@@ -1,0 +1,26 @@
+{
+  "version": 4,
+  "configurations": [
+      {
+          "name": "Mac",
+          "includePath": [
+              "${workspaceFolder}/**",                              // Your project files
+              "/opt/homebrew/Cellar/boost/1.87.0/include",           // Path to Boost headers
+              "/opt/homebrew/opt/openssl@3/include"               // Path to OpenSSL headers
+          ],
+          "defines": [],
+          "intelliSenseMode": "macos-clang-x64",                    // Use clang for macOS
+          "compilerPath": "/usr/bin/clang++",                       // Path to your C++ compiler (clang++)
+          "cStandard": "c11",
+          "cppStandard": "c++17",                                   // C++ standard
+          "browse": {
+              "path": [
+                  "${workspaceFolder}",
+                  "/opt/homebrew/Cellar/boost/1.87.0/include",      // Same Boost path for browsing headers
+                  "/opt/homebrew/opt/openssl@3/include"          // Same OpenSSL path for browsing headers
+              ],
+              "limitSymbolsToIncludedHeaders": true
+          }
+      }
+  ]
+}

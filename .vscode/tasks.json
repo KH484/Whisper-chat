@@ -1,0 +1,30 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+      {
+          "label": "build",
+          "type": "shell",
+          "command": "/usr/bin/clang++",  // Use clang++ as the C++ compiler
+          "args": [
+              "-g",                                           // Debug information
+              "-std=c++17",                                    // Specify C++ standard
+              "-I/opt/homebrew/Cellar/boost/1.87.0/include",    // Boost include path
+              "-I/opt/homebrew/opt/openssl@3/include",          // OpenSSL 3 include path
+              "main.cpp",                                      // Your source file(s)
+              "-o", "main",                                    // Output binary name
+              "-L/opt/homebrew/opt/openssl@3/lib",              // OpenSSL 3 library path
+              "-L/opt/homebrew/Cellar/boost/1.87.0/lib",        // Boost library path (optional, if needed)
+              "-lssl",                                         // Link OpenSSL SSL library
+              "-lcrypto",                                      // Link OpenSSL Crypto library
+              "-lboost_system",                                // Link Boost system library
+              "-pthread"                                       // Link pthread for threading support
+          ],
+          "group": {
+              "kind": "build",
+              "isDefault": true
+          },
+          "problemMatcher": ["$clang"],
+          "detail": "Generated task for C++ build"
+      }
+  ]
+}
