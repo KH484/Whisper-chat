@@ -15,22 +15,27 @@ using std::string;
 
 // Setup connection:
 
-int setupConnection(int portNumber, string ipAddress)
-  {
-  int portPreference;
+int portPreference()
+{
+  int portNumber;
+  int portChoice;
   cout << "First we will create a port in order to access the chat. " << '\n';
   cout << "Do you want to select one or have one generated automatically? " << '\n';
   cout << "Please select one of the following numbers: " << '\n';
   cout << "1: specify a port " << '\n';
   cout << "2: generate one automatically " << '\n';
-  cin >> portPreference;
-  if (portPreference == 1){
+  cin >> portChoice;
+  if (portChoice == 1){
     cout << "Please type the number for the port you wish to use " << '\n';
     cin >> portNumber;
   } else {
     portNumber = 6300;
   }
+}
 
+int setupConnection(int portNumber, string ipAddress)
+  {
+  portPreference();
   boost::asio::io_context io_context;                               // Create an io_context object for Boost.Asio for asynchronous operations
   boost::asio::ip::tcp::acceptor acceptor(io_context);              // Define the TCP acceptor to listen on a specific endpoint
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(ipAddress), portNumber);   // Create an endpoint with the computer IP and port
