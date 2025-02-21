@@ -1,8 +1,6 @@
 #include <iostream>
 #include <string>
-// #include "whisperFunctions.h"
-
-
+#include "whisperFunctions.h"
 #include <boost/asio.hpp>                      // Boost Asio header files for asynchronous operations
 #include <boost/asio/ip/address.hpp>
 #include <boost/asio/ssl.hpp>                 // Boost SSL support header file
@@ -13,8 +11,9 @@ using std::cout;
 using std::cin;
 using std::string;
 
-// Setup connection:
-
+// generate or specifiy a port number for the connection
+// ideas for improvement include a loop to keep asking if a wrong port number entered
+// check if the port number entered is within the correct range
 int portPreference()
 {
   int portNumber;
@@ -31,14 +30,20 @@ int portPreference()
   } else {
     portNumber = 6300;
   }
+  return portNumber;
 }
 
 int setupConnection(int portNumber, string ipAddress)
   {
-  portPreference();
+  // portPreference();
   boost::asio::io_context io_context;                               // Create an io_context object for Boost.Asio for asynchronous operations
+  boost::system::error_code ec;                                     // catch any errors arising from the wrong ip address during conversion from string
   boost::asio::ip::tcp::acceptor acceptor(io_context);              // Define the TCP acceptor to listen on a specific endpoint
-  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(ipAddress), portNumber);   // Create an endpoint with the computer IP and port
+  boost::asio::ip::tcp::resolver resolver(io_context);              // Resolver to resolve IP address or domain name
+  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress, ec), portNumber);
+
+  // boost::asio::ip::tcp::resolver::results_type endpoints = resolver.resolve(ipAddress, std::to_string(portNumber));
+  // boost::asio::ip::tcp::endpoint endpoint = *endpoints.begin();      // Get the first endpoint from the resolved list
 
   try {
     acceptor.open(endpoint.protocol());                             // Open the acceptor with the protocol type (TCP)
@@ -54,25 +59,28 @@ int setupConnection(int portNumber, string ipAddress)
     cout << "Error: " << error.what() << '\n';
     return 1;                                                       //returning 1 so we know the programme did not complete successfully
   }
+  return 0;                                                         // Return 0 to indicate successful connection setup
 }
 
-//client side (receive)
 int joinConnection(int portNumber, string ipAddress)
-  {
-  boost::asio::io_context io_context;                               // Create an io_context object for Boost.Asio for asynchronous operations
-  boost::asio::ip::tcp::socket socket(io_context);                  // Creating a socket that links to the asyncrhonous object
-  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::address::from_string(ipAddress), portNumber);  // Define the starting client's conenction endpoint (IP address and port)
+{
+    boost::asio::io_context io_context;  // Create an io_context object for Boost.Asio for asynchronous operations
+    boost::asio::ip::tcp::socket socket(io_context);  // Creating a socket that links to the asynchronous object
+    boost::asio::ip::tcp::resolver resolver(io_context);  // Resolver to resolve IP address or domain name
+    boost::asio::ip::tcp::resolver::results_type endpoints = resolver.resolve(ipAddress, std::to_string(portNumber));     // Resolve the IP address and port number
+    boost::asio::ip::tcp::endpoint endpoint = *endpoints.begin();    // Get the first endpoint from the resolved list
 
-  try {
-  socket.connect(endpoint);                                          // Connect to the other client
-  cout << "Connected to server!" << '\n';
-  }
-  catch (const boost::system::system_error& error)                  // creating a variable called error and referencing it in the catch block so we can log and print the error
-  {
-  cout << "Error: " << error.what() << '\n';
-  return 1;                                                       //returning 1 so we know the programme did not complete successfully
-  }
+    try {
+        socket.connect(endpoint);                             // Connect to the other client
+        cout << "Connected to server!" << '\n';
+    }
+    catch (const boost::system::system_error& error) {
+        cout << "Error: " << error.what() << '\n';
+        return 1;                                             // Return 1 to indicate failure
+    }
+    return 0;  // Return 0 for success
 }
+
 
 //   read operation
 //       string message = read_(socket_);

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-// #include "whisperFunctions.h"
+#include "whisperFunctions.h"
 
 // Boost Asio header files for asynchronous operations
 #include <boost/asio.hpp>
@@ -17,14 +17,13 @@ using std::string;
 
 int main()
 {
-
   string user1;
   cout << "Whisper Chat" << '\n';
   cout << "What is your name?: ";
   cin >> user1;
   cout << "Hello " << user1 << "Welcome to Whisper chat, made for parents to share parenting advice & tips" << '\n';
 
-  int userChoice;
+  string userChoice;
   cout << "Would you like to:" << '\n';
   cout << "1: Send a message " << '\n';
   cout << "2: Wait for a message " << '\n';
@@ -32,5 +31,10 @@ int main()
   cin >> userChoice;
   cout << userChoice;
 
+  if (userChoice == "1") {
+    setupConnection(6300, "192.168.1.186");
+  } else {
+    joinConnection(6300, "192.168.1.186");
+  }
   return 0;
 }
