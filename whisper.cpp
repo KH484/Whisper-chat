@@ -1,19 +1,19 @@
 #include <iostream>
 #include <string>
 #include "whisperFunctions.h"
-
-// Boost Asio header files for asynchronous operations
-#include <boost/asio.hpp>
+#include <boost/asio.hpp>               // Boost Asio header files for asynchronous operations
 #include <boost/asio/ip/address.hpp>
-// Boost SSL support header file
-#include <boost/asio/ssl.hpp>
-// open SSL header files necessary to handle the SSL functionality
-#include <openssl/ssl.h>
+#include <boost/asio/ssl.hpp>           // Boost SSL support header file
+#include <openssl/ssl.h>                // open SSL header files necessary to handle the SSL functionality
 #include <openssl/crypto.h>
 
 using std::cout;
 using std::cin;
 using std::string;
+
+//think about how to make global variables
+string ipAddress = "192.168.1.186";
+int portNumber = 6300;
 
 int main()
 {
@@ -32,9 +32,9 @@ int main()
   cout << userChoice;
 
   if (userChoice == "1") {
-    setupConnection(6300, "192.168.1.186");
+    setupConnection(portNumber, ipAddress);
   } else {
-    joinConnection(6300, "192.168.1.186");
+    joinConnection(portNumber, ipAddress);
   }
   return 0;
 }

@@ -39,11 +39,7 @@ int setupConnection(int portNumber, string ipAddress)
   boost::asio::io_context io_context;                               // Create an io_context object for Boost.Asio for asynchronous operations
   boost::system::error_code ec;                                     // catch any errors arising from the wrong ip address during conversion from string
   boost::asio::ip::tcp::acceptor acceptor(io_context);              // Define the TCP acceptor to listen on a specific endpoint
-  boost::asio::ip::tcp::resolver resolver(io_context);              // Resolver to resolve IP address or domain name
-  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress, ec), portNumber);
-
-  // boost::asio::ip::tcp::resolver::results_type endpoints = resolver.resolve(ipAddress, std::to_string(portNumber));
-  // boost::asio::ip::tcp::endpoint endpoint = *endpoints.begin();      // Get the first endpoint from the resolved list
+  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress, ec), portNumber);  // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
   try {
     acceptor.open(endpoint.protocol());                             // Open the acceptor with the protocol type (TCP)
@@ -66,9 +62,7 @@ int joinConnection(int portNumber, string ipAddress)
 {
     boost::asio::io_context io_context;  // Create an io_context object for Boost.Asio for asynchronous operations
     boost::asio::ip::tcp::socket socket(io_context);  // Creating a socket that links to the asynchronous object
-    boost::asio::ip::tcp::resolver resolver(io_context);  // Resolver to resolve IP address or domain name
-    boost::asio::ip::tcp::resolver::results_type endpoints = resolver.resolve(ipAddress, std::to_string(portNumber));     // Resolve the IP address and port number
-    boost::asio::ip::tcp::endpoint endpoint = *endpoints.begin();    // Get the first endpoint from the resolved list
+    boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);   // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
     try {
         socket.connect(endpoint);                             // Connect to the other client
@@ -81,6 +75,14 @@ int joinConnection(int portNumber, string ipAddress)
     return 0;  // Return 0 for success
 }
 
+// string read() {
+//   string message = read_(socket_);
+//   cout << message << endl;
+// }
+
+// string write() {
+
+// }
 
 //   read operation
 //       string message = read_(socket_);
