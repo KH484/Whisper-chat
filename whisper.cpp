@@ -20,7 +20,6 @@ int main()
   string user1, user2, userChoice;
 
   cout << "Welcome to Whisper chat, made for parents to share parenting advice & tips" << '\n';
-
   cout << "Would you like to:" << '\n';
   cout << "1: Send a message " << '\n';
   cout << "2: Wait for a message " << '\n';
@@ -32,14 +31,16 @@ int main()
     cout << "What is your name?: " << '\n';
     cin >> user1;
     cout << "Hello " << user1 << '\n';
-    cout << "If you want to exit Whisper just type EXIT (in capitals)" << '\n';
+    cout << "Type EXIT to leave the chat" << '\n';
     setupConnection(portNumber, ipAddress, user1, user2);
-    } else {
+    }if (userChoice == "2") {
     cout << "What is your name?: " << '\n';
     cin >> user2;
     cout << "Hello " << user2 << '\n';
-    cout << "If you want to exit Whisper just type EXIT (in capitals)" << '\n';
+    cout << "Type EXIT to leave the chat" << '\n';
     joinConnection(portNumber, ipAddress, user1, user2);
-  }
+    }else {
+      cout << "You typed something incorrectly.  Please only select 1 or 2" << '\n';
+    }
   return 0;
 }
