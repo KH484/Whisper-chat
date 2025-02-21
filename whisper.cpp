@@ -18,10 +18,9 @@ int portNumber = 6300;
 int main()
 {
   string user1;
-  cout << "Whisper Chat" << '\n';
-  cout << "What is your name?: ";
-  cin >> user1;
-  cout << "Hello " << user1 << "Welcome to Whisper chat, made for parents to share parenting advice & tips" << '\n';
+  string user2;
+
+  cout << "Welcome to Whisper chat, made for parents to share parenting advice & tips" << '\n';
 
   string userChoice;
   cout << "Would you like to:" << '\n';
@@ -31,10 +30,17 @@ int main()
   cin >> userChoice;
   cout << userChoice;
 
-  if (userChoice == "1") {
-    setupConnection(portNumber, ipAddress);
-  } else {
-    joinConnection(portNumber, ipAddress);
+  if (userChoice == "1") {                                                      // function to get the name to use later
+    cout << "What is your name?: " << '\n';
+    cin >> user1;
+    cout << "Hello " << user1 << '\n';
+    setupConnection(portNumber, ipAddress, user1, user2);
+    } else {
+    string user2;
+    cout << "What is your name?: " << '\n';
+    cin >> user2;
+    cout << "Hello " << user2 << '\n';
+    joinConnection(portNumber, ipAddress, user1, user2);
   }
   return 0;
 }

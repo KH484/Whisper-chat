@@ -14,26 +14,26 @@ using std::string;
 // generate or specifiy a port number for the connection
 // ideas for improvement include a loop to keep asking if a wrong port number entered
 // check if the port number entered is within the correct range
-int portPreference()
-{
-  int portNumber;
-  int portChoice;
-  cout << "First we will create a port in order to access the chat. " << '\n';
-  cout << "Do you want to select one or have one generated automatically? " << '\n';
-  cout << "Please select one of the following numbers: " << '\n';
-  cout << "1: specify a port " << '\n';
-  cout << "2: generate one automatically " << '\n';
-  cin >> portChoice;
-  if (portChoice == 1){
-    cout << "Please type the number for the port you wish to use " << '\n';
-    cin >> portNumber;
-  } else {
-    portNumber = 6300;
-  }
-  return portNumber;
-}
+// int portPreference()
+// {
+//   int portNumber;
+//   int portChoice;
+//   cout << "First we will create a port in order to access the chat. " << '\n';
+//   cout << "Do you want to select one or have one generated automatically? " << '\n';
+//   cout << "Please select one of the following numbers: " << '\n';
+//   cout << "1: specify a port " << '\n';
+//   cout << "2: generate one automatically " << '\n';
+//   cin >> portChoice;
+//   if (portChoice == 1){
+//     cout << "Please type the number for the port you wish to use " << '\n';
+//     cin >> portNumber;
+//   } else {
+//     portNumber = 6300;
+//   }
+//   return portNumber;
+// }
 
-int setupConnection(int portNumber, string ipAddress)
+int setupConnection(int portNumber, string ipAddress, string user1, string user2)
   {
   // portPreference();
   boost::asio::io_context io_context;                               // Create an io_context object for Boost.Asio for asynchronous operations
@@ -44,26 +44,35 @@ int setupConnection(int portNumber, string ipAddress)
   try {
     acceptor.open(endpoint.protocol());                             // Open the acceptor with the protocol type (TCP)
     acceptor.bind(endpoint);                                        // Bind the acceptor to the endpoint (IP address and port)
-    acceptor.listen();                                              // Start listening for incoming connections
-    cout << "Listening on " << endpoint.port() << "..." << '\n';
+    acceptor.listen();
+    cin.ignore();                                                   // clearing the input so it doesn't re-print the last input
+    cout << "Listening on " << endpoint.port() << "..." << '\n';    // Start listening for incoming connections
     boost::asio::ip::tcp::socket socket(io_context);                // Accept a TCP connection
     acceptor.accept(socket);                                        // Block until a connection is accepted then create a socket
     cout << "Client connected!" << '\n';
+    // Once connection is established, send a message
+    string message;
+    cout << "What is your message?" << '\n';
+    std::getline(cin, message);
+    boost::asio::write(socket, boost::asio::buffer(message));       // Send the message to the client
+    cout << user1 << ": " << message << '\n';                       // printin the message out
   }
   catch (const boost::system::system_error& error)                  // creating a variable called error and referencing it in the catch block so we can log and print the error
   {
     cout << "Error: " << error.what() << '\n';
     return 1;                                                       //returning 1 so we know the programme did not complete successfully
   }
-  return 0;                                                         // Return 0 to indicate successful connection setup
+  return 0;
 }
 
-int joinConnection(int portNumber, string ipAddress)
+
+int joinConnection(int portNumber, string ipAddress, string user1, string user2)
 {
     boost::asio::io_context io_context;  // Create an io_context object for Boost.Asio for asynchronous operations
     boost::asio::ip::tcp::socket socket(io_context);  // Creating a socket that links to the asynchronous object
     boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);   // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
+    cin.ignore();
     try {
         socket.connect(endpoint);                             // Connect to the other client
         cout << "Connected to server!" << '\n';
@@ -76,12 +85,30 @@ int joinConnection(int portNumber, string ipAddress)
 }
 
 // string read() {
-//   string message = read_(socket_);
-//   cout << message << endl;
+
+// create a large enough buffer
+// pass in the socket to the function
+// call the async read_some function (parameter of the buffer size and buffer data)
+// lamda to tell the async read_some function to read the data (when some arrives) and to put the data in the buffer.  You can use error_code ec here to check for errors.
+// loop through the buffer to display the data to the console - is this necessary?
+// call the read() function again.  (This will be fine because it only reads when data is sent to be received)
+// sock.send(boost::asio::buffer(data, size));
 // }
 
-// string write() {
+// void write() {
+//   string message;
+
+//   cout << "Write a message: " << '\n';                                // Asking the client what message to send
+//   std::getline(std::cin, message);                                    // Use getline to read the entire line, including spaces
+
+//   try {
+//       boost::asio::write(socket, boost::asio::buffer(message));       // Send the message using boost::asio::write
+//       cout << "Message sent: " << message << '\n';
+//   } catch (const boost::system::system_error& e) {
+//       cout << "Error sending message: " << e.what() << '\n';          // Catch and display any errors
+//   }
 // }
+
 
 //   read operation
 //       string message = read_(socket_);
