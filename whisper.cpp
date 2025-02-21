@@ -17,12 +17,10 @@ int portNumber = 6300;
 
 int main()
 {
-  string user1;
-  string user2;
+  string user1, user2, userChoice;
 
   cout << "Welcome to Whisper chat, made for parents to share parenting advice & tips" << '\n';
 
-  string userChoice;
   cout << "Would you like to:" << '\n';
   cout << "1: Send a message " << '\n';
   cout << "2: Wait for a message " << '\n';
@@ -30,16 +28,17 @@ int main()
   cin >> userChoice;
   cout << userChoice;
 
-  if (userChoice == "1") {                                                      // function to get the name to use later
+  if (userChoice == "1") {                                               // function to get the name to use later
     cout << "What is your name?: " << '\n';
     cin >> user1;
     cout << "Hello " << user1 << '\n';
+    cout << "If you want to exit Whisper just type EXIT (in capitals)" << '\n';
     setupConnection(portNumber, ipAddress, user1, user2);
     } else {
-    string user2;
     cout << "What is your name?: " << '\n';
     cin >> user2;
     cout << "Hello " << user2 << '\n';
+    cout << "If you want to exit Whisper just type EXIT (in capitals)" << '\n';
     joinConnection(portNumber, ipAddress, user1, user2);
   }
   return 0;

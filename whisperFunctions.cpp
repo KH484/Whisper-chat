@@ -49,13 +49,16 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
     cout << "Listening on " << endpoint.port() << "..." << '\n';    // Start listening for incoming connections
     boost::asio::ip::tcp::socket socket(io_context);                // Accept a TCP connection
     acceptor.accept(socket);                                        // Block until a connection is accepted then create a socket
-    cout << "Client connected!" << '\n';
-    // Once connection is established, send a message
+    cout << "Client connected! You can now write a message:" << '\n';  // Once connection is established, send a message
     string message;
-    cout << "What is your message?" << '\n';
-    std::getline(cin, message);
-    boost::asio::write(socket, boost::asio::buffer(message));       // Send the message to the client
-    cout << user1 << ": " << message << '\n';                       // printin the message out
+    while (message != "EXIT"){
+      std::getline(cin, message);
+      boost::asio::write(socket, boost::asio::buffer(message));       // Send the message to the client use the boost asio buffer function
+      cout << user1 << ": " << message << '\n';                        // printin the message out
+      if (message == "EXIT") {
+        break;
+      }
+    }
   }
   catch (const boost::system::system_error& error)                  // creating a variable called error and referencing it in the catch block so we can log and print the error
   {
@@ -68,20 +71,30 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
 
 int joinConnection(int portNumber, string ipAddress, string user1, string user2)
 {
-    boost::asio::io_context io_context;  // Create an io_context object for Boost.Asio for asynchronous operations
-    boost::asio::ip::tcp::socket socket(io_context);  // Creating a socket that links to the asynchronous object
-    boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);   // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
+  boost::asio::io_context io_context;  // Create an io_context object for Boost.Asio for asynchronous operations
+  boost::asio::ip::tcp::socket socket(io_context);  // Creating a socket that links to the asynchronous object
+  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);   // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
-    cin.ignore();
-    try {
-        socket.connect(endpoint);                             // Connect to the other client
-        cout << "Connected to server!" << '\n';
+  cin.ignore();
+  try {
+    socket.connect(endpoint);                             // Connect to the other client
+    cout << "Connected to server!" << '\n';
+    string message;
+    boost::asio::streambuf buffer;                        // Buffer to hold the incoming data
+    boost::asio::read_until(socket, buffer, "\n");        // Read data until newline (Enter key) is pressed
+    if (buffer.size() > 0) {
+    std::istream input_stream(&buffer);                   // Extract the received message from the buffer
+    std::getline(input_stream, message);
+    cout << user1 << ": " << message << '\n';
+    } else {
+      cout << "Houston we have a problem" << '\n';
     }
-    catch (const boost::system::system_error& error) {
-        cout << "Error: " << error.what() << '\n';
-        return 1;                                             // Return 1 to indicate failure
-    }
-    return 0;  // Return 0 for success
+  }
+  catch (const boost::system::system_error& error) {
+      cout << "Error: " << error.what() << '\n';
+      return 1;                                             // Return 1 to indicate failure
+  }
+  return 0;  // Return 0 for success
 }
 
 // string read() {
