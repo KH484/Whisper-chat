@@ -11,13 +11,13 @@ using std::cout;
 using std::cin;
 using std::string;
 
-//think about how to make global variables
-string ipAddress = "192.168.1.186";
-int portNumber = 6300;
+const string ipAddress = "192.168.1.186";
+// int portNumber = 6300;
 
 int main()
 {
   string user1, user2, userChoice;
+  int portNumber;
 
   cout << "Welcome to Whisper chat, made for parents to share parenting advice & tips" << '\n';
   cout << "Would you like to:" << '\n';
@@ -27,18 +27,22 @@ int main()
   cin >> userChoice;
   cout << userChoice;
 
-  if (userChoice == "1") {                                               // function to get the name to use later
-    cout << "What is your name?: " << '\n';
+  if (userChoice == "1") {
+    cin.ignore();                                                        // clear the cin so it doesn't display the last input
+    cout << "What is your name?: " << '\n';                              // function to get the name to use later
     cin >> user1;
     cout << "Hello " << user1 << '\n';
-    cout << "Type EXIT to leave the chat" << '\n';
-    setupConnection(portNumber, ipAddress, user1, user2);
+    cout << "Type 'EXIT' at anytime to leave the chat" << '\n';
+    setupConnection(portNumber, ipAddress, user1, user2);                // Setup the connection function
+    cin.ignore();
     }if (userChoice == "2") {
+    cin.ignore();
     cout << "What is your name?: " << '\n';
     cin >> user2;
     cout << "Hello " << user2 << '\n';
-    cout << "Type EXIT to leave the chat" << '\n';
-    joinConnection(portNumber, ipAddress, user1, user2);
+    cout << "Type 'EXIT' at anytime to leave the chat" << '\n';
+    joinConnection(portNumber, ipAddress, user1, user2);                  // Join the connection function
+    cin.ignore();
     }else {
       cout << "You typed something incorrectly.  Please only select 1 or 2" << '\n';
     }
