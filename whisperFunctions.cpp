@@ -39,16 +39,18 @@ using std::string;
 //   return portNumber;
 //   cin.ignore();
 // }
+bool chatOpen = true;
 
 void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
   string message;
-  while (true) {
+  while (chatOpen) {
     try {
       cout << name;
       std::getline(cin, message);
       if (message == "EXIT") {
         cout << "The chat has ended." << '\n';
         cout << "Thank you for using Whisper Chat. Goodbye" << '\n';                      // Exit condition for the loop
+        chatOpen = false;
         break;
       }else {
         string messageFormat = name + ": " + message + '\n';
