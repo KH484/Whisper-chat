@@ -54,6 +54,7 @@ void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
       }
     } catch (std::exception& error){
       std::cerr << "Send Exception: " << error.what() << '\n';
+      break;
     }
   }
 }
@@ -82,6 +83,7 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
   boost::system::error_code ec;                                     // catch any errors arising from the wrong ip address during conversion from string
   boost::asio::ip::tcp::acceptor acceptor(io_context);              // Define the TCP acceptor to listen on a specific endpoint
   // portNumber = portPreference();
+  boost::asio::ip::tcp::socket socket(io_context);                // Accept a TCP connection
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress, ec), portNumber);  // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
   string name;
@@ -91,7 +93,6 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
       acceptor.bind(endpoint);                                        // Bind the acceptor to the endpoint (IP address and port)
       acceptor.listen();
       cout << "Listening on " << endpoint.port() << "..." << '\n';    // Start listening for incoming connections
-      boost::asio::ip::tcp::socket socket(io_context);                // Accept a TCP connection
       acceptor.accept(socket);                                        // Block until a connection is accepted then create a socket
       cout << "Client connected! You can now write a message:" << '\n';  // Once connection is established, send a message
 
