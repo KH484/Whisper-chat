@@ -11,6 +11,7 @@ using std::cout;
 using std::cin;
 using std::string;
 
+
 // generate or specifiy a port number for the connection
 // ideas for improvement include a loop to keep asking if a wrong port number entered and check if the port number entered is within the correct range
 
@@ -43,13 +44,14 @@ void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
   string message;
   while (true) {
     try {
+      cout << name;
       std::getline(cin, message);
       if (message == "EXIT") {
         cout << "The chat has ended." << '\n';
         cout << "Thank you for using Whisper Chat. Goodbye" << '\n';                      // Exit condition for the loop
         break;
       }else {
-        string messageFormat = name + ":" + message + '\n';
+        string messageFormat = name + ": " + message + '\n';
         boost::asio::write(socket, boost::asio::buffer(messageFormat));                   // Send the message to the client
       }
     } catch (std::exception& error){
@@ -67,7 +69,7 @@ void readMessage(boost::asio::ip::tcp::socket& socket, string name) {
     if (buffer.size() > 0) {
     std::istream input_stream(&buffer);                   // Extract the received message from the buffer
     std::getline(input_stream, message);
-    cout << name << ": " << "\033[35m" << message << "\033[0m" << '\n';
+    cout << name + "\033[35m" + message + "\033[0m" << '\n';
     } else {
       cout << "Houston we have a problem. Message not received" << '\n';
       cout << "The chat has ended." << '\n';
