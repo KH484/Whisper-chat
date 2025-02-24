@@ -14,30 +14,30 @@ using std::string;
 // generate or specifiy a port number for the connection
 // ideas for improvement include a loop to keep asking if a wrong port number entered and check if the port number entered is within the correct range
 
-int portPreference()
-{
-  int portNumber;
-  int portChoice;
-  cout << "First we will create a port in order to setup the chat. " << '\n';
-  cout << "Do you want to select one or have one generated automatically? " << '\n';
-  cout << "Please select one of the following numbers: " << '\n';
-  cout << "1: specify a port " << '\n';
-  cout << "2: generate one automatically " << '\n';
-  cin >> portChoice;
-  if (portChoice == 1){
-    cin.ignore();
-    if (portChoice <= 1024 && portChoice > 65535){
-      cin >> portNumber;
-    } else {
-      cout << "Please type a number within the correct range" << '\n';
-    }
-  } else {
-    portNumber = 6300;
-  }
-  cout << "port number is " << portNumber << '\n';
-  return portNumber;
-  cin.ignore();
-}
+// int portPreference()
+// {
+//   int portNumber;
+//   int portChoice;
+//   cout << "First we will create a port in order to setup the chat. " << '\n';
+//   cout << "Do you want to select one or have one generated automatically? " << '\n';
+//   cout << "Please select one of the following numbers: " << '\n';
+//   cout << "1: specify a port " << '\n';
+//   cout << "2: generate one automatically " << '\n';
+//   cin >> portChoice;
+//   if (portChoice == 1){
+//     cin.ignore();
+//     if (portChoice <= 1024 && portChoice > 65535){
+//       cin >> portNumber;
+//     } else {
+//       cout << "Please type a number within the correct range" << '\n';
+//     }
+//   } else {
+//     portNumber = 6300;
+//   }
+//   cout << "port number is " << portNumber << '\n';
+//   return portNumber;
+//   cin.ignore();
+// }
 
 void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
   string message;
@@ -76,7 +76,7 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
   boost::asio::io_context io_context;                               // Create an io_context object for Boost.Asio for asynchronous operations
   boost::system::error_code ec;                                     // catch any errors arising from the wrong ip address during conversion from string
   boost::asio::ip::tcp::acceptor acceptor(io_context);              // Define the TCP acceptor to listen on a specific endpoint
-  portNumber = portPreference();
+  // portNumber = portPreference();
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress, ec), portNumber);  // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
   string name;
@@ -119,10 +119,12 @@ int joinConnection(int portNumber, string ipAddress, string user1, string user2)
   try {
     socket.connect(endpoint);                             // Connect to the other client
     cout << "Connected to server!" << '\n';
+    while (true){
     name = user2;
     readMessage(socket, name);
     name = user1;
     sendMessage(socket, name);
+    }
   }
   catch (const boost::system::system_error& error) {
       cout << "Error: " << error.what() << '\n';
