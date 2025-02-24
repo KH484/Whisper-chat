@@ -45,7 +45,6 @@ void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
   string message;
   while (chatOpen) {
     try {
-      cout << name;
       std::getline(cin, message);
       if (message == "EXIT") {
         cout << "The chat has ended." << '\n';
@@ -53,7 +52,7 @@ void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
         chatOpen = false;
         break;
       }else {
-        string messageFormat = name + ": " + message + '\n';
+        string messageFormat = name + ": " + message + '\n';                              // adding the newline character so getline knows it's the end of the message
         boost::asio::write(socket, boost::asio::buffer(messageFormat));                   // Send the message to the client
       }
     } catch (std::exception& error){
@@ -66,16 +65,17 @@ void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
 void readMessage(boost::asio::ip::tcp::socket& socket, string name) {
   string message;
   boost::asio::streambuf buffer; // Buffer to hold the incoming data
-  while (true){
+  while (chatOpen){
     boost::asio::read_until(socket, buffer, "\n");        // Read data until newline (Enter key) is pressed
     if (buffer.size() > 0) {
     std::istream input_stream(&buffer);                   // Extract the received message from the buffer
     std::getline(input_stream, message);
-    cout << name + "\033[35m" + message + "\033[0m" << '\n';
+    cout << "\033[35m" + message + "\033[0m" << '\n';
     } else {
       cout << "Houston we have a problem. Message not received" << '\n';
       cout << "The chat has ended." << '\n';
       cout << "Thank you for using Whisper Chat. Goodbye" << '\n';
+      chatOpen = false;
       break;
     }
   }
