@@ -12,65 +12,105 @@ using std::cin;
 using std::string;
 
 // generate or specifiy a port number for the connection
-// ideas for improvement include a loop to keep asking if a wrong port number entered
-// check if the port number entered is within the correct range
+// ideas for improvement include a loop to keep asking if a wrong port number entered and check if the port number entered is within the correct range
+
 // int portPreference()
 // {
 //   int portNumber;
 //   int portChoice;
-//   cout << "First we will create a port in order to access the chat. " << '\n';
+//   cout << "First we will create a port in order to setup the chat. " << '\n';
 //   cout << "Do you want to select one or have one generated automatically? " << '\n';
 //   cout << "Please select one of the following numbers: " << '\n';
 //   cout << "1: specify a port " << '\n';
 //   cout << "2: generate one automatically " << '\n';
 //   cin >> portChoice;
 //   if (portChoice == 1){
-//     cout << "Please type the number for the port you wish to use " << '\n';
-//     cin >> portNumber;
+//     cin.ignore();
+//     if (portChoice <= 1024 && portChoice > 65535){
+//       cin >> portNumber;
+//     } else {
+//       cout << "Please type a number within the correct range" << '\n';
+//     }
 //   } else {
 //     portNumber = 6300;
 //   }
+//   cout << "port number is " << portNumber << '\n';
 //   return portNumber;
+//   cin.ignore();
 // }
 
-bool chatOpen = true;
-
-void sendMessage(boost::asio::ip::tcp::socket& socket, const string& user1, const string& user2) {
+void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
   string message;
-  while (true) {                                                     // infinite loop (until the user types EXIT)
-      std::getline(cin, message);                                    // Read input from user
-      boost::asio::write(socket, boost::asio::buffer(message));      // Send the message to the client
-      cout << user1 << ": " << message << '\n';                      // Print the message out with user1's name
-
-      if (message == "EXIT") {                                       // Exit condition for the loop
-          break;
+  while (true) {
+    try {
+      cout << "Enter message: " << '\n';
+      std::getline(cin, message);
+      if (message == "EXIT") {
+        cout << "The chat has ended." << '\n';
+        cout << "Thank you for using Whisper Chat. Goodbye" << '\n';                      // Exit condition for the loop
+        break;
+      }else {
+        string messageFormat = name + ":" + message + '\n';
+        boost::asio::write(socket, boost::asio::buffer(messageFormat));                   // Send the message to the client
       }
+    } catch (std::exception& error){
+      std::cerr << "Send Exception: " << error.what() << '\n';
+    }
   }
 }
 
+void readMessage(boost::asio::ip::tcp::socket& socket, string name) {
+  string message;
+  while (true){
+    boost::asio::streambuf buffer;                        // Buffer to hold the incoming data
+    boost::asio::read_until(socket, buffer, "\n");        // Read data until newline (Enter key) is pressed
+    if (buffer.size() > 0) {
+    std::istream input_stream(&buffer);                   // Extract the received message from the buffer
+    std::getline(input_stream, message);
+    cout << name << ": " << "\033[35m" << message << "\033[0m" << '\n';
+    } else {
+      cout << "Houston we have a problem. Message not received" << '\n';
+      cout << "The chat has ended." << '\n';
+      cout << "Thank you for using Whisper Chat. Goodbye" << '\n';
+      break;
+    }
+  }
+}
+
+
 int setupConnection(int portNumber, string ipAddress, string user1, string user2){
-  // portPreference();
   boost::asio::io_context io_context;                               // Create an io_context object for Boost.Asio for asynchronous operations
   boost::system::error_code ec;                                     // catch any errors arising from the wrong ip address during conversion from string
   boost::asio::ip::tcp::acceptor acceptor(io_context);              // Define the TCP acceptor to listen on a specific endpoint
+  // portNumber = portPreference();
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress, ec), portNumber);  // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
-  while (chatOpen != false){
+  string name;
+  while (true){
     try {
       acceptor.open(endpoint.protocol());                             // Open the acceptor with the protocol type (TCP)
       acceptor.bind(endpoint);                                        // Bind the acceptor to the endpoint (IP address and port)
       acceptor.listen();
-      cin.ignore();                                                   // clearing the input so it doesn't re-print the last input
       cout << "Listening on " << endpoint.port() << "..." << '\n';    // Start listening for incoming connections
       boost::asio::ip::tcp::socket socket(io_context);                // Accept a TCP connection
       acceptor.accept(socket);                                        // Block until a connection is accepted then create a socket
       cout << "Client connected! You can now write a message:" << '\n';  // Once connection is established, send a message
-      sendMessage(socket, user1);
+
+      while (true) {
+        name = user1;
+        sendMessage(socket, name);
+        name = user2;
+        readMessage (socket, name);
+      }
     }
     catch (const boost::system::system_error& error)                  // creating a variable called error and referencing it in the catch block so we can log and print the error
     {
       cout << "Error: " << error.what() << '\n';
-      return 1;                                                       // returning 1 so we know the programme did not complete successfully
+      cout << "Houston we have a problem. Message not received" << '\n';
+      cout << "The chat has ended." << '\n';
+      cout << "Thank you for using Whisper Chat. Goodbye" << '\n';
+      return 1;
+      break;                                                          // returning 1 so we know the programme did not complete successfully
     }
     return 0;
   }
@@ -84,68 +124,23 @@ int joinConnection(int portNumber, string ipAddress, string user1, string user2)
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);   // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
   cin.ignore();
+  string name;
   try {
     socket.connect(endpoint);                             // Connect to the other client
     cout << "Connected to server!" << '\n';
-    string message;
-    boost::asio::streambuf buffer;                        // Buffer to hold the incoming data
-    boost::asio::read_until(socket, buffer, "\n");        // Read data until newline (Enter key) is pressed
-    if (buffer.size() > 0) {
-    std::istream input_stream(&buffer);                   // Extract the received message from the buffer
-    std::getline(input_stream, message);
-    cout << user1 << ": " << message << '\n';
-    } else {
-      cout << "Houston we have a problem" << '\n';
+    while (true){
+      name = user2;
+      readMessage(socket, name);
+      name = user1;
+      sendMessage(socket, name);
     }
   }
   catch (const boost::system::system_error& error) {
       cout << "Error: " << error.what() << '\n';
+      cout << "Houston we have a problem. Message not received" << '\n';
+      cout << "The chat has ended." << '\n';
+      cout << "Thank you for using Whisper Chat. Goodbye" << '\n';
       return 1;                                             // Return 1 to indicate failure
   }
   return 0;  // Return 0 for success
 }
-
-// string read() {
-
-// create a large enough buffer
-// pass in the socket to the function
-// call the async read_some function (parameter of the buffer size and buffer data)
-// lamda to tell the async read_some function to read the data (when some arrives) and to put the data in the buffer.  You can use error_code ec here to check for errors.
-// loop through the buffer to display the data to the console - is this necessary?
-// call the read() function again.  (This will be fine because it only reads when data is sent to be received)
-// sock.send(boost::asio::buffer(data, size));
-// }
-
-// void write() {
-//   string message;
-
-//   cout << "Write a message: " << '\n';                                // Asking the client what message to send
-//   std::getline(std::cin, message);                                    // Use getline to read the entire line, including spaces
-
-//   try {
-//       boost::asio::write(socket, boost::asio::buffer(message));       // Send the message using boost::asio::write
-//       cout << "Message sent: " << message << '\n';
-//   } catch (const boost::system::system_error& e) {
-//       cout << "Error sending message: " << e.what() << '\n';          // Catch and display any errors
-//   }
-// }
-
-
-//   read operation
-//       string message = read_(socket_);
-//       cout << message << endl;
-//   write operation
-//       send_(socket_, "Hello From Server!");
-//       cout << "Servent sent Hello message to Client!" << endl;
-//   return 0;
-
-//
-/*
-  function to generate random port number:
-
-  random port number between 1024 and 63353 avoiding:
-  vector <int> portsInUse {7000,5000,53781,49576,1024,1026,5432,44950,54687,54688,54671,53790,54679,53934}
-  generate a random number
-  check if the number is in the vector using count
-  then if not in the vector allocate that port but if so then regenerate a randome number
-*/
