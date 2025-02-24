@@ -92,19 +92,19 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
       acceptor.open(endpoint.protocol());                             // Open the acceptor with the protocol type (TCP)
       acceptor.bind(endpoint);                                        // Bind the acceptor to the endpoint (IP address and port)
       acceptor.listen();
-      cout << "Listening on " << endpoint.port() << "..." << '\n';    // Start listening for incoming connections
+      cout << "Listening on port " << endpoint.port() << ". Please wait to be connected..." << '\n';    // Start listening for incoming connections
       acceptor.accept(socket);                                        // Block until a connection is accepted then create a socket
-      cout << "Client connected! You can now write a message:" << '\n';  // Once connection is established, send a message
+      cout << "Client connected! You can now send messages." << '\n';  // Once connection is established, send a message
 
-    // Create a thread for reading messages from the server
-    std::thread read_thread(readMessage, std::ref(socket), user2);
+      // Create a thread for reading messages from the server
+      std::thread read_thread(readMessage, std::ref(socket), user2);
 
-    // Create a thread for sending messages to the server
-    std::thread send_thread(sendMessage, std::ref(socket), user1);
+      // Create a thread for sending messages to the server
+      std::thread send_thread(sendMessage, std::ref(socket), user1);
 
-    // Join the threads (this makes sure that the main thread waits for the threads to finish)
-    read_thread.join();
-    send_thread.join();
+      // Join the threads (this makes sure that the main thread waits for the threads to finish)
+      read_thread.join();
+      send_thread.join();
     }
     catch (const boost::system::system_error& error)                  // creating a variable called error and referencing it in the catch block so we can log and print the error
     {
@@ -126,11 +126,11 @@ int joinConnection(int portNumber, string ipAddress, string user1, string user2)
   boost::asio::ip::tcp::socket socket(io_context);                    // Creating a socket that links to the asynchronous object
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);   // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
-  cin.ignore();
   string name;
+  cout << "Connecting to Peer 1. Please wait to be connected..." << '\n';
   try {
     socket.connect(endpoint);                             // Connect to the other client
-    cout << "Connected to server!" << '\n';
+    cout << "Connected to server! You can now send messages" << '\n';
 
     // Start a thread for receiving messages
     std::thread read_thread(readMessage, std::ref(socket), user1);
