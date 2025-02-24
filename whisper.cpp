@@ -11,13 +11,13 @@ using std::cout;
 using std::cin;
 using std::string;
 
-const string ipAddress = "192.168.1.186";
-// int portNumber = 6300;
+const string ipAddress = "127.0.0.1";
+
 
 int main()
 {
   string user1, user2, userChoice;
-  int portNumber;
+  int portNumber = 6300;
 
   cout << "Welcome to Whisper chat, made for parents to share parenting advice & tips" << '\n';
   cout << "Would you like to:" << '\n';
@@ -36,13 +36,13 @@ int main()
     setupConnection(portNumber, ipAddress, user1, user2);                // Setup the connection function
     cin.ignore();
     }if (userChoice == "2") {
-    cin.ignore();
-    cout << "What is your name?: " << '\n';
-    cin >> user2;
-    cout << "Hello " << user2 << '\n';
-    cout << "Type 'EXIT' at anytime to leave the chat" << '\n';
-    joinConnection(portNumber, ipAddress, user1, user2);                  // Join the connection function
-    cin.ignore();
+      cin.ignore();
+      cout << "What is your name?: " << '\n';
+      cin >> user2;
+      cout << "Hello " << user2 << '\n';
+      cout << "Type 'EXIT' at anytime to leave the chat" << '\n';
+      joinConnection(portNumber, ipAddress, user1, user2);                  // Join the connection function
+      cin.ignore();
     }else {
       cout << "You typed something incorrectly.  Please only select 1 or 2" << '\n';
     }
