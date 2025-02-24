@@ -41,15 +41,21 @@ using std::string;
 
 void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
   string message;
-  while (true) {                                                     // infinite loop (until the user types EXIT)
-      std::getline(cin, message);                                    // Read the whole sentence input from user
-      boost::asio::write(socket, boost::asio::buffer(message));      // Send the message to the client
-      cout << name << ": " << message << '\n';                      // Print the message out with user1's name
+  while (true) {
+    try {
+      cout << "Enter message: " << '\n';
+      std::getline(cin, message);
       if (message == "EXIT") {
         cout << "The chat has ended." << '\n';
         cout << "Thank you for using Whisper Chat. Goodbye" << '\n';                      // Exit condition for the loop
         break;
+      }else {
+        string messageFormat = name + ":" + message + '\n';
+        boost::asio::write(socket, boost::asio::buffer(messageFormat));                   // Send the message to the client
       }
+    } catch (std::exception& error){
+      std::cerr << "Send Exception: " << error.what() << '\n';
+    }
   }
 }
 
@@ -89,10 +95,13 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
       boost::asio::ip::tcp::socket socket(io_context);                // Accept a TCP connection
       acceptor.accept(socket);                                        // Block until a connection is accepted then create a socket
       cout << "Client connected! You can now write a message:" << '\n';  // Once connection is established, send a message
-      name = user1;
-      sendMessage(socket, name);
-      name = user2;
-      readMessage (socket, name);
+
+      while (true) {
+        name = user1;
+        sendMessage(socket, name);
+        name = user2;
+        readMessage (socket, name);
+      }
     }
     catch (const boost::system::system_error& error)                  // creating a variable called error and referencing it in the catch block so we can log and print the error
     {
@@ -120,10 +129,10 @@ int joinConnection(int portNumber, string ipAddress, string user1, string user2)
     socket.connect(endpoint);                             // Connect to the other client
     cout << "Connected to server!" << '\n';
     while (true){
-    name = user2;
-    readMessage(socket, name);
-    name = user1;
-    sendMessage(socket, name);
+      name = user2;
+      readMessage(socket, name);
+      name = user1;
+      sendMessage(socket, name);
     }
   }
   catch (const boost::system::system_error& error) {
