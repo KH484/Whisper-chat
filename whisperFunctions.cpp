@@ -61,8 +61,8 @@ void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
 
 void readMessage(boost::asio::ip::tcp::socket& socket, string name) {
   string message;
+  boost::asio::streambuf buffer; // Buffer to hold the incoming data
   while (true){
-    boost::asio::streambuf buffer;                        // Buffer to hold the incoming data
     boost::asio::read_until(socket, buffer, "\n");        // Read data until newline (Enter key) is pressed
     if (buffer.size() > 0) {
     std::istream input_stream(&buffer);                   // Extract the received message from the buffer
@@ -96,12 +96,15 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
       acceptor.accept(socket);                                        // Block until a connection is accepted then create a socket
       cout << "Client connected! You can now write a message:" << '\n';  // Once connection is established, send a message
 
-      while (true) {
-        name = user1;
-        sendMessage(socket, name);
-        name = user2;
-        readMessage (socket, name);
-      }
+    // Create a thread for reading messages from the server
+    std::thread read_thread(readMessage, std::ref(socket), user2);
+
+    // Create a thread for sending messages to the server
+    std::thread send_thread(sendMessage, std::ref(socket), user1);
+
+    // Join the threads (this makes sure that the main thread waits for the threads to finish)
+    read_thread.join();
+    send_thread.join();
     }
     catch (const boost::system::system_error& error)                  // creating a variable called error and referencing it in the catch block so we can log and print the error
     {
@@ -128,12 +131,16 @@ int joinConnection(int portNumber, string ipAddress, string user1, string user2)
   try {
     socket.connect(endpoint);                             // Connect to the other client
     cout << "Connected to server!" << '\n';
-    while (true){
-      name = user2;
-      readMessage(socket, name);
-      name = user1;
-      sendMessage(socket, name);
-    }
+
+    // Start a thread for receiving messages
+    std::thread read_thread(readMessage, std::ref(socket), user1);
+
+    // Start a thread for sending messages
+    std::thread send_thread(sendMessage, std::ref(socket), user2);
+
+    // Join the threads
+    read_thread.join();
+    send_thread.join();
   }
   catch (const boost::system::system_error& error) {
       cout << "Error: " << error.what() << '\n';
