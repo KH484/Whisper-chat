@@ -89,12 +89,13 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
       boost::asio::ip::tcp::socket socket(io_context);                // Accept a TCP connection
       acceptor.accept(socket);                                        // Block until a connection is accepted then create a socket
       cout << "Client connected! You can now write a message:" << '\n';  // Once connection is established, send a message
-      name = user1;
-      sendMessage(socket, name);
-      name = user2;
-      readMessage (socket, name);
-    }
-    catch (const boost::system::system_error& error)                  // creating a variable called error and referencing it in the catch block so we can log and print the error
+      while (true){
+        name = user1;
+        readMessage(socket, name);
+        name = user2;
+        sendMessage(socket, name);
+        }
+      } catch (const boost::system::system_error& error)                  // creating a variable called error and referencing it in the catch block so we can log and print the error
     {
       cout << "Error: " << error.what() << '\n';
       cout << "Houston we have a problem. Message not received" << '\n';
