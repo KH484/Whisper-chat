@@ -4,14 +4,13 @@
 #include <boost/asio.hpp>                      // Boost Asio header files for asynchronous operations
 #include <boost/asio/ip/address.hpp>
 #include <boost/asio/ssl.hpp>                 // Boost SSL support header file
-#include <openssl/ssl.h>                      // open SSL header files necessary to handle the SSL functionality
-#include <openssl/crypto.h>
+#include <openssl/ssl.h>                       // open SSL header files necessary to handle the SSL functionality
+#include <openssl/x509.h>
+
 
 using std::cout;
 using std::cin;
 using std::string;
-
-
 // generate or specifiy a port number for the connection
 // ideas for improvement include a loop to keep asking if a wrong port number entered and check if the port number entered is within the correct range
 
@@ -39,60 +38,70 @@ using std::string;
 //   return portNumber;
 //   cin.ignore();
 // }
-bool chatOpen = true;
-
-const string certFile = "/SSLfiles/whisper.crt";
-const string privateKeyFile = "/SSLfiles/whisper.key";
-const string publicKeyFile = "/SSLfiles/whisper_public.key";
 
 void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
   string message;
-  while (chatOpen) {
-    try {
-      std::getline(cin, message);
+  while (true) {                                                     // infinite loop (until the user types EXIT)
+      std::getline(cin, message);                                    // Read the whole sentence input from user
+      boost::asio::write(socket, boost::asio::buffer(message));      // Send the message to the client
+      cout << name << ": " << message << '\n';                      // Print the message out with user1's name
       if (message == "EXIT") {
         cout << "The chat has ended." << '\n';
         cout << "Thank you for using Whisper Chat. Goodbye" << '\n';                      // Exit condition for the loop
-        chatOpen = false;
         break;
-      }else {
-        string messageFormat = name + ": " + message + '\n';                              // adding the newline character so getline knows it's the end of the message
-        boost::asio::write(socket, boost::asio::buffer(messageFormat));                   // Send the message to the client
       }
-    } catch (std::exception& error){
-      std::cerr << "Send Exception: " << error.what() << '\n';
-      break;
-    }
   }
 }
 
 void readMessage(boost::asio::ip::tcp::socket& socket, string name) {
   string message;
-  boost::asio::streambuf buffer; // Buffer to hold the incoming data
-  while (chatOpen){
+  while (true){
+    boost::asio::streambuf buffer;                        // Buffer to hold the incoming data
     boost::asio::read_until(socket, buffer, "\n");        // Read data until newline (Enter key) is pressed
     if (buffer.size() > 0) {
     std::istream input_stream(&buffer);                   // Extract the received message from the buffer
     std::getline(input_stream, message);
-    cout << "\033[35m" + message + "\033[0m" << '\n';
+    cout << name << ": " << "\033[35m" << message << "\033[0m" << '\n';
     } else {
       cout << "Houston we have a problem. Message not received" << '\n';
       cout << "The chat has ended." << '\n';
       cout << "Thank you for using Whisper Chat. Goodbye" << '\n';
-      chatOpen = false;
       break;
     }
   }
 }
 
+const string certFile = "/SSLfiles/whisper.crt"; // SSL server certificate
+const string privateKeyFile = "/SSLfiles/whisper.key"; // SSL Private key
+const string publicKeyFile = "/SSLfiles/whisper_public.key"; // SSL public key
+
+// Function to test loading certificate and private key
+void test_certificate_loading() {
+  try {
+      // Create SSL context with TLSv12
+      boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);
+
+      // Load the certificate and private key
+      ctx.use_certificate_file(certFile, boost::asio::ssl::context::pem);
+      ctx.use_private_key_file(privateKeyFile, boost::asio::ssl::context::pem);
+
+      // If no exception is thrown, print success
+      std::cout << "Certificate and private key loaded successfully!" << std::endl;
+  }
+  catch (const boost::system::system_error& e) {
+      // Catch any error that occurs during loading and display it
+      std::cout << "Error loading certificate or private key: " << e.what() << std::endl;
+  }
+}
 
 int setupConnection(int portNumber, string ipAddress, string user1, string user2){
   boost::asio::io_context io_context;                               // Create an io_context object for Boost.Asio for asynchronous operations
   boost::system::error_code ec;                                     // catch any errors arising from the wrong ip address during conversion from string
   boost::asio::ip::tcp::acceptor acceptor(io_context);              // Define the TCP acceptor to listen on a specific endpoint
   // portNumber = portPreference();
-  boost::asio::ip::tcp::socket socket(io_context);                // Accept a TCP connection
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress, ec), portNumber);  // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
+
+  test_certificate_loading();// Call the create_ssl_context function to create SSL context
 
   string name;
   while (true){
@@ -100,19 +109,14 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
       acceptor.open(endpoint.protocol());                             // Open the acceptor with the protocol type (TCP)
       acceptor.bind(endpoint);                                        // Bind the acceptor to the endpoint (IP address and port)
       acceptor.listen();
-      cout << "Listening on port " << endpoint.port() << ". Please wait to be connected..." << '\n';    // Start listening for incoming connections
+      cout << "Listening on " << endpoint.port() << "..." << '\n';    // Start listening for incoming connections
+      boost::asio::ip::tcp::socket socket(io_context);                // Accept a TCP connection
       acceptor.accept(socket);                                        // Block until a connection is accepted then create a socket
-      cout << "Client connected! You can now send messages." << '\n';  // Once connection is established, send a message
-
-      // Create a thread for reading messages from the server
-      std::thread read_thread(readMessage, std::ref(socket), user2);
-
-      // Create a thread for sending messages to the server
-      std::thread send_thread(sendMessage, std::ref(socket), user1);
-
-      // Join the threads (this makes sure that the main thread waits for the threads to finish)
-      read_thread.join();
-      send_thread.join();
+      cout << "Client connected! You can now write a message:" << '\n';  // Once connection is established, send a message
+      name = user1;
+      sendMessage(socket, name);
+      name = user2;
+      readMessage (socket, name);
     }
     catch (const boost::system::system_error& error)                  // creating a variable called error and referencing it in the catch block so we can log and print the error
     {
@@ -134,21 +138,17 @@ int joinConnection(int portNumber, string ipAddress, string user1, string user2)
   boost::asio::ip::tcp::socket socket(io_context);                    // Creating a socket that links to the asynchronous object
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);   // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
+  cin.ignore();
   string name;
-  cout << "Connecting to Peer 1. Please wait to be connected..." << '\n';
   try {
     socket.connect(endpoint);                             // Connect to the other client
-    cout << "Connected to server! You can now send messages" << '\n';
-
-    // Start a thread for receiving messages
-    std::thread read_thread(readMessage, std::ref(socket), user1);
-
-    // Start a thread for sending messages
-    std::thread send_thread(sendMessage, std::ref(socket), user2);
-
-    // Join the threads
-    read_thread.join();
-    send_thread.join();
+    cout << "Connected to server!" << '\n';
+    while (true){
+    name = user2;
+    readMessage(socket, name);
+    name = user1;
+    sendMessage(socket, name);
+    }
   }
   catch (const boost::system::system_error& error) {
       cout << "Error: " << error.what() << '\n';
