@@ -39,6 +39,10 @@ using std::string;
 //   cin.ignore();
 // }
 
+const string certFile = "/SSLfiles/whisper.crt";
+const string privateKeyFile = "/SSLfiles/whisper.key";
+const string publicKeyFile = "/SSLfiles/whisper_public.key";
+
 void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
   string message;
   while (true) {                                                     // infinite loop (until the user types EXIT)
