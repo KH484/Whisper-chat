@@ -41,6 +41,10 @@ using std::string;
 // }
 bool chatOpen = true;
 
+const string certFile = "/SSLfiles/whisper.crt";
+const string privateKeyFile = "/SSLfiles/whisper.key";
+const string publicKeyFile = "/SSLfiles/whisper_public.key";
+
 void sendMessage(boost::asio::ip::tcp::socket& socket, string name) {
   string message;
   while (chatOpen) {
