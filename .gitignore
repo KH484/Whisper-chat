@@ -1,0 +1,5 @@
+SSLfiles/
+  whisper.crt
+  whisper.key
+  whisper.csr
+  whisper_public.key
