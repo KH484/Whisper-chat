@@ -21,28 +21,23 @@ int main()
 
   cout << "Welcome to Whisper chat, made for parents to share parenting advice & tips" << '\n';
   cout << "Would you like to:" << '\n';
-  cout << "1: Send a message " << '\n';
-  cout << "2: Wait for a message " << '\n';
+  cout << "1: Start the chat as Peer 1 (Server) " << '\n';
+  cout << "2: Start the chat as Peer 2 (Client) " << '\n';
   cout << "Please enter your choice of 1 or 2: " << '\n';
-  cin >> userChoice;
-  cout << userChoice;
+  std::getline(cin, userChoice);
 
-  if (userChoice == "1") {
-    cin.ignore();                                                        // clear the cin so it doesn't display the last input
+  if (userChoice == "1") {                                                       // clear the cin so it doesn't display the last input
     cout << "What is your name?: " << '\n';                              // function to get the name to use later
-    cin >> user1;
+    std::getline(cin, user1);
     cout << "Hello " << user1 << '\n';
     cout << "Type 'EXIT' at anytime to leave the chat" << '\n';
     setupConnection(portNumber, ipAddress, user1, user2);                // Setup the connection function
-    cin.ignore();
     }if (userChoice == "2") {
-      cin.ignore();
       cout << "What is your name?: " << '\n';
-      cin >> user2;
+      std::getline(cin, user2);
       cout << "Hello " << user2 << '\n';
       cout << "Type 'EXIT' at anytime to leave the chat" << '\n';
       joinConnection(portNumber, ipAddress, user1, user2);                  // Join the connection function
-      cin.ignore();
     }else {
       cout << "You typed something incorrectly.  Please only select 1 or 2" << '\n';
     }
