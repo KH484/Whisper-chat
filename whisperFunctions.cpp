@@ -71,9 +71,9 @@ void readMessage(boost::asio::ip::tcp::socket& socket, string name) {
   }
 }
 
-const string certFile = "/SSLfiles/whisper.crt"; // SSL server certificate
-const string privateKeyFile = "/SSLfiles/whisper.key"; // SSL Private key
-const string publicKeyFile = "/SSLfiles/whisper_public.key"; // SSL public key
+const string certFile = "SSLfiles/whisper.crt"; // SSL server certificate
+const string privateKeyFile = "SSLfiles/whisper.key"; // SSL Private key
+const string publicKeyFile = "SSLfiles/whisper_public.key"; // SSL public key
 
 // Function to test loading certificate and private key
 void test_certificate_loading() {
