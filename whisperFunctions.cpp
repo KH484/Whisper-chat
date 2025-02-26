@@ -1,16 +1,16 @@
 #include <iostream>
 #include <string>
 #include "whisperFunctions.h"
-#include <boost/asio.hpp>                      // Boost Asio header files for asynchronous operations
+#include <boost/asio.hpp>               // Boost Asio header files for asynchronous operations
 #include <boost/asio/ip/address.hpp>
-#include <boost/asio/ssl.hpp>                 // Boost SSL support header file
-#include <openssl/ssl.h>                       // open SSL header files necessary to handle the SSL functionality
+#include <boost/asio/ssl.hpp>           // Boost SSL support header file
+#include <openssl/ssl.h>                // open SSL header files necessary to handle the SSL functionality
+#include <openssl/crypto.h>
 #include <openssl/x509.h>
 
 using std::cout;
 using std::cin;
 using std::string;
-
 
 // generate or specifiy a port number for the connection
 // ideas for improvement include a loop to keep asking if a wrong port number entered and check if the port number entered is within the correct range
@@ -137,7 +137,6 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
   }
   return 0;
 }
-
 
 int joinConnection(int portNumber, string ipAddress, string user1, string user2)
 {

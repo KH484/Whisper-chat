@@ -16,7 +16,7 @@ SRC = whisper.cpp whisperFunctions.cpp
 OUT = whisper                                        # The name of the output executable
 
 # Libraries to link: OpenSSL, Boost, and pthread
-LIBS = -lssl -lcrypto -lboost_system -pthread -lboost_ssl
+LIBS = -lssl -lcrypto -lboost_system -pthread        # Link OpenSSL and Boost System libraries (no need for -lboost_ssl)
 
 # Build target: compiles the source into the executable
 all: $(OUT)
