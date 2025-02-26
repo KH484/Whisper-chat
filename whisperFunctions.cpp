@@ -118,7 +118,7 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
 
       cout << "Client connected! You can now send messages." << '\n';  // Once connection is established, send a message
       // Create a thread for reading messages from the server
-      std::thread read_thread(readMessage, std::ref(ssl_socket), user2);
+      std::thread read_thread(readMessage, std::ref(ssl_socket), user1);
 
       // Create a thread for sending messages to the server
       std::thread send_thread(sendMessage, std::ref(ssl_socket), user1);
@@ -157,7 +157,7 @@ int joinConnection(int portNumber, string ipAddress, string user1, string user2)
     cout << "SSL Handshake complete.  Your messages will be encrypted." << '\n';  // Handshake completed successfully
 
     // Start a thread for receiving messages
-    std::thread read_thread(readMessage, std::ref(ssl_socket), user1);
+    std::thread read_thread(readMessage, std::ref(ssl_socket), user2);
 
     // Start a thread for sending messages
     std::thread send_thread(sendMessage, std::ref(ssl_socket), user2);
