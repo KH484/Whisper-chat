@@ -1,6 +1,6 @@
 #include <iostream>
 #include <string>
-#include "whisperFunctions.h"
+#include "whisperfunctions.h"
 #include <boost/asio.hpp>                      // Boost Asio header files for asynchronous operations
 #include <boost/asio/ip/address.hpp>
 #include <boost/asio/ssl.hpp>                 // Boost SSL support header file
