@@ -43,6 +43,7 @@ bool chatOpen = true;
 
 void sendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
   string message;
+  cout << name + ": " << std::flush;
   while (chatOpen) {
     try {
       std::getline(cin, message);
@@ -70,7 +71,8 @@ void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
     if (buffer.size() > 0) {
     std::istream input_stream(&buffer);                   // Extract the received message from the buffer
     std::getline(input_stream, message);
-    cout << "\033[35m" + message + "\033[0m" << '\n';
+    cout << "\n" << "\033[35m" + message + "\033[0m" << '\n';
+    cout << name << ": " << std::flush;
     } else {
       cout << "Houston we have a problem. Message not received" << '\n';
       cout << "The chat has ended." << '\n';
@@ -116,7 +118,7 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
 
       cout << "Client connected! You can now send messages." << '\n';  // Once connection is established, send a message
       // Create a thread for reading messages from the server
-      std::thread read_thread(readMessage, std::ref(ssl_socket), user2);
+      std::thread read_thread(readMessage, std::ref(ssl_socket), user1);
 
       // Create a thread for sending messages to the server
       std::thread send_thread(sendMessage, std::ref(ssl_socket), user1);
@@ -155,7 +157,7 @@ int joinConnection(int portNumber, string ipAddress, string user1, string user2)
     cout << "SSL Handshake complete.  Your messages will be encrypted." << '\n';  // Handshake completed successfully
 
     // Start a thread for receiving messages
-    std::thread read_thread(readMessage, std::ref(ssl_socket), user1);
+    std::thread read_thread(readMessage, std::ref(ssl_socket), user2);
 
     // Start a thread for sending messages
     std::thread send_thread(sendMessage, std::ref(ssl_socket), user2);
