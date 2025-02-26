@@ -4,22 +4,22 @@
         {
             "name": "Mac",
             "includePath": [
-                "${workspaceFolder}/**",
-                "/opt/homebrew/opt/boost/include",
-                "/opt/homebrew/opt/openssl@3/include",
-                "/opt/homebrew/opt/openssl@3/include/openssl",
-                "${workspaceFolder}"
+                "${workspaceFolder}/**",                            // Include workspace headers
+                "/opt/homebrew/opt/boost/include",                   // Boost headers
+                "/opt/homebrew/opt/openssl@3/include",               // OpenSSL headers
+                "/opt/homebrew/opt/openssl@3/include/openssl",       // OpenSSL headers specifically
+                "${workspaceFolder}"                                 // Current workspace folder headers
             ],
             "defines": [],
-            "intelliSenseMode": "macos-clang-x64",
-            "compilerPath": "/usr/bin/clang++",
-            "cStandard": "c11",
-            "cppStandard": "c++17",
+            "intelliSenseMode": "macos-clang-x64",                  // Ensure correct platform and compiler mode
+            "compilerPath": "/usr/bin/clang++",                     // Path to clang++
+            "cStandard": "c11",                                     // C standard
+            "cppStandard": "c++17",                                 // C++ standard
             "browse": {
                 "path": [
                     "${workspaceFolder}",
-                    "/opt/homebrew/opt/boost/include",
-                    "/opt/homebrew/opt/openssl@3/include/openssl"
+                    "/opt/homebrew/opt/boost/include",            // Boost headers for browsing
+                    "/opt/homebrew/opt/openssl@3/include/openssl"  // OpenSSL headers for browsing
                 ],
                 "limitSymbolsToIncludedHeaders": true
             }
