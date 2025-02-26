@@ -43,6 +43,7 @@ bool chatOpen = true;
 
 void sendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
   string message;
+  cout << name + ": " << std::flush;
   while (chatOpen) {
     try {
       std::getline(cin, message);
@@ -70,7 +71,8 @@ void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
     if (buffer.size() > 0) {
     std::istream input_stream(&buffer);                   // Extract the received message from the buffer
     std::getline(input_stream, message);
-    cout << "\033[35m" + message + "\033[0m" << '\n';
+    cout << "\n" << "\033[35m" + message + "\033[0m" << '\n';
+    cout << name << ": " << std::flush;
     } else {
       cout << "Houston we have a problem. Message not received" << '\n';
       cout << "The chat has ended." << '\n';
