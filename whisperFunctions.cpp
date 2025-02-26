@@ -47,12 +47,12 @@ void sendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
     try {
       std::getline(cin, message);
       if (message == "EXIT") {
-        string messageFormat = name + ": " + message + '\n';                              // adding the newline character so getline knows it's the end of the message
-        boost::asio::write(ssl_socket, boost::asio::buffer(messageFormat));
-        cout << "The chat has ended." << '\n';
+        message += "\n";                                                                      // Send the shutdown message to the client
+        boost::asio::write(ssl_socket, boost::asio::buffer(message));             // Send shutdown signal to the client
+        cout << "The chat has ended as 'EXIT' was typed." << '\n';
         cout << "Thank you for using Whisper Chat. Goodbye" << '\n';                      // Exit condition for the loop
         chatOpen = false;
-        break;
+        break;  // Exit the loop
       }else {
         string messageFormat = name + ": " + message + '\n';                              // adding the newline character so getline knows it's the end of the message
         boost::asio::write(ssl_socket, boost::asio::buffer(messageFormat));                // Send the message to the client
@@ -72,8 +72,15 @@ void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
     if (buffer.size() > 0) {
     std::istream input_stream(&buffer);                   // Extract the received message from the buffer
     std::getline(input_stream, message);
-    cout << "\033[35m" + message + "\033[0m" << '\n';
-    cout << name << ": " << std::flush;
+      // Check if the received message is the shutdown signal "Shutdown"
+      if (message == "EXIT") {
+        cout << "Server has ended the chat. Exiting..." << '\n';  // Inform the client that the server ended the chat
+        chatOpen = false;  // Close the chat connection
+        break;  // Exit the loop and stop receiving messages
+      }
+      // If message is not the shutdown signal, display it as part of the chat
+      cout << "\033[35m" + message + "\033[0m" << '\n';  // Print received message
+      cout << name << ": " << std::flush;  // Prompt for the next message
     } else {
       cout << "Houston we have a problem. Message not received" << '\n';
       cout << "The chat has ended." << '\n';
@@ -101,7 +108,8 @@ int setupConnection(int portNumber, string ipAddress, string user1){
       acceptor.open(endpoint.protocol());                            // Open the acceptor with the protocol type (TCP)
       acceptor.bind(endpoint);                                       // Bind the acceptor to the endpoint (IP address and port)
       acceptor.listen();
-      cout << "Listening on port " << endpoint.port() << ". Please wait to be connected..." << '\n';    // Start listening for incoming connections
+      cout << "\n" << "Listening on port " << endpoint.port() << "...";
+      cout << "\n" << "Please wait to be connected." << '\n';    // Start listening for incoming connections
 
       boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);                     // Create SSL context with TLSv12
       ctx.use_certificate_file(certFile, boost::asio::ssl::context::pem);                   // Load the certificate and private key
@@ -111,13 +119,13 @@ int setupConnection(int portNumber, string ipAddress, string user1){
 
       try {
         ssl_socket.handshake(boost::asio::ssl::stream_base::server);                        // Handshake to establish an SSL connection
-        cout << "SSL Handshake complete.  Your messages will be encrypted" << '\n';         // If handshake is successful
+        cout << "\n" << "SSL Handshake complete.  Your messages will be encrypted" << '\n';         // If handshake is successful
       } catch (const boost::system::system_error& e) {
         cout << "Error during SSL handshake: " << e.what() << '\n';
         return 1; // Exit the function if handshake fails
       }
 
-      cout << "Client connected! You can now send messages." << '\n';  // Once connection is established, send a message
+      cout << "\n" << "Client connected! You can now send messages." << '\n';  // Once connection is established, send a message
 
       // Create a thread for reading messages from the server
       std::thread read_thread(readMessage, std::ref(ssl_socket), user1);
@@ -151,7 +159,7 @@ int joinConnection(int portNumber, string ipAddress, string user2)
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);   // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
   string name;
-  cout << "Connecting to Peer 1. Please wait to be connected..." << '\n';
+  cout << "\n" << "Connecting to Whisperer 1. Please wait to be connected..." << '\n';
   try {
     ssl_socket.lowest_layer().connect(endpoint);  // Connect the SSL socket to the server
     ssl_socket.handshake(boost::asio::ssl::stream_base::client);  // Perform SSL handshake
