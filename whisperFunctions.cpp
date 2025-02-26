@@ -43,11 +43,12 @@ bool chatOpen = true;
 
 void sendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
   string message;
-  cout << name + ": " << std::flush;
   while (chatOpen) {
     try {
       std::getline(cin, message);
       if (message == "EXIT") {
+        string messageFormat = name + ": " + message + '\n';                              // adding the newline character so getline knows it's the end of the message
+        boost::asio::write(ssl_socket, boost::asio::buffer(messageFormat));
         cout << "The chat has ended." << '\n';
         cout << "Thank you for using Whisper Chat. Goodbye" << '\n';                      // Exit condition for the loop
         chatOpen = false;
@@ -71,7 +72,7 @@ void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
     if (buffer.size() > 0) {
     std::istream input_stream(&buffer);                   // Extract the received message from the buffer
     std::getline(input_stream, message);
-    cout << "\n" << "\033[35m" + message + "\033[0m" << '\n';
+    cout << "\033[35m" + message + "\033[0m" << '\n';
     cout << name << ": " << std::flush;
     } else {
       cout << "Houston we have a problem. Message not received" << '\n';
@@ -87,7 +88,7 @@ const string certFile = "SSLfiles/whisper.crt";                     // SSL serve
 const string privateKeyFile = "SSLfiles/whisper.key";               // SSL Private key
 const string publicKeyFile = "SSLfiles/whisper_public.key";         // SSL public key
 
-int setupConnection(int portNumber, string ipAddress, string user1, string user2){
+int setupConnection(int portNumber, string ipAddress, string user1){
   boost::asio::io_context io_context;                               // Create an io_context object for Boost.Asio for asynchronous operations
   boost::system::error_code ec;                                     // catch any errors arising from the wrong ip address during conversion from string
   boost::asio::ip::tcp::acceptor acceptor(io_context);              // Define the TCP acceptor to listen on a specific endpoint
@@ -117,6 +118,7 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
       }
 
       cout << "Client connected! You can now send messages." << '\n';  // Once connection is established, send a message
+
       // Create a thread for reading messages from the server
       std::thread read_thread(readMessage, std::ref(ssl_socket), user1);
 
@@ -140,7 +142,7 @@ int setupConnection(int portNumber, string ipAddress, string user1, string user2
   return 0;
 }
 
-int joinConnection(int portNumber, string ipAddress, string user1, string user2)
+int joinConnection(int portNumber, string ipAddress, string user2)
 {
   boost::asio::io_context io_context;                                 // Create an io_context object for Boost.Asio for asynchronous operations
   boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);  // Create SSL context
@@ -153,8 +155,9 @@ int joinConnection(int portNumber, string ipAddress, string user1, string user2)
   try {
     ssl_socket.lowest_layer().connect(endpoint);  // Connect the SSL socket to the server
     ssl_socket.handshake(boost::asio::ssl::stream_base::client);  // Perform SSL handshake
-    cout << "Connected to server!" << '\n';
     cout << "SSL Handshake complete.  Your messages will be encrypted." << '\n';  // Handshake completed successfully
+    cout << "Connected to server! You can now send messages" << '\n';
+    cout << user2 + ": ";
 
     // Start a thread for receiving messages
     std::thread read_thread(readMessage, std::ref(ssl_socket), user2);
