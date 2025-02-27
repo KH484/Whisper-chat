@@ -8,6 +8,8 @@
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
 #include <vector>
+#include <random>
+#include <algorithm>
 
 using std::cout;
 using std::cin;
@@ -16,8 +18,21 @@ using std::vector;
 
 // generate or specifiy a port number for the connection
 
-int portPreference()
-{
+int generateNumber(){
+  int randomNumber;
+  vector<int> portNumbersInUse {5000, 5432, 7000, 44950, 44960, 54818};
+  std::random_device rd;                                  // Initialize random_device to get a random seed
+  std::mt19937 gen(rd());                               // Initialize the Mersenne Twister pseudo-random number generator with the seed
+  std::uniform_int_distribution<> dist(1024, 65535);     // Define a uniform distribution in the range [1, 99]
+  randomNumber = dist(gen);                                // generate the number
+  if (count(portNumbersInUse.begin(), portNumbersInUse.end(), randomNumber)){
+    generateNumber();
+  }
+  return randomNumber;
+}
+
+int portPreference(){
+  int randomNumber;
   int portNumber;
   string portSelection;
   string portChoice;
@@ -34,15 +49,22 @@ int portPreference()
     std::getline(cin, portSelection);  // Read user choice as a string
     portNumber = std::stoi(portSelection);
     if (portNumber >= 1024 && portNumber <= 65535){
-      return portNumber;
+      if (count(portNumbersInUse.begin(), portNumbersInUse.end(), portNumber)) {
+        cout << "Port number is already in use. Pick again."<< "\n";
+        portPreference();
+      } else {
+        return portNumber;
+      }
     } else {
       cout << "Please type a number within the correct range" << '\n';
+      portPreference();
     }
   } else {
-    //generate random port number
-    portNumber = 6301;
-  }
+  //generate random port number
+  portNumber = generateNumber();
   cout << "port number is " << portNumber << '\n';
+  return portNumber;
+  }
   return portNumber;
 }
 
