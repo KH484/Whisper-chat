@@ -13,3 +13,4 @@ int setupConnection(int portNumber, string ipAddress, string user1);
 int joinConnection(int portNumber, string ipAddress, string user2);
 void sendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name);
 void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name);
+int runProgramme();
