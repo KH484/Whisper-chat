@@ -72,9 +72,9 @@ bool chatOpen = true;
 
 void sendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
   string message;
-  cout << name << ": " << std::flush;  // Prompt for the next message
   while (chatOpen) {
     try {
+      cout << name << ": " << std::flush;  // Prompt for the next message
       std::getline(cin, message);
       if (message == "EXIT") {
         message += "\n";                                                                      // Send the shutdown message to the client
