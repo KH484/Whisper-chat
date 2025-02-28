@@ -12,4 +12,5 @@
 int main()
 {
   runProgramme();
+  return 0;
 }
