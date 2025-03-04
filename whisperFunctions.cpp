@@ -40,10 +40,10 @@ int generateNumber(){
   std::mt19937 gen(rd());                                                 // Initialize the Mersenne Twister pseudo-random number generator with the seed
   std::uniform_int_distribution<> dist(1024, 65535);                      // Define a uniform distribution in the range only within port range you should use
   randomNumber = dist(gen);                                               // generate the number
-  if (count(portNumbersInUse.begin(), portNumbersInUse.end(), randomNumber)){
-    return generateNumber();
+  if (std::find(portNumbersInUse.begin(), portNumbersInUse.end(), randomNumber)== portNumbersInUse.end()){
+    return randomNumber;
   }
-  return randomNumber;
+  return generateNumber();
 }
 
 // generate or specifiy a port number for the connection and validates selected port
@@ -66,11 +66,11 @@ int portPreference(){
     std::getline(cin, portSelection);             // Read user choice as a string
     portNumber = std::stoi(portSelection);
     if (portNumber >= 1024 && portNumber <= 65535){
-      if (count(portNumbersInUse.begin(), portNumbersInUse.end(), portNumber)) {
+      if (std::find(portNumbersInUse.begin(), portNumbersInUse.end(), portNumber) == portNumbersInUse.end()) {
+        return portNumber;
+      } else {
         cout << "Port number is already in use. Try again or generate a port automatically."<< "\n";
         return portPreference();
-      } else {
-        return portNumber;
       }
     } else {
       cout << "Please type a number within the correct range (1024 - 65535)" << '\n';
@@ -253,7 +253,7 @@ int runProgramme(){
   if (userChoice == "1") {
     cout << '\n' << "What is your name?: " << '\n';                              // function to get the name to use later
     std::getline(cin, user1);
-    cout << "Hello " << user1 << ". " << "\033[36m" <<  "Whisper Chat!" << "\033[0m" <<'\n';
+    cout << "Hello " << user1 << ". Welcome to " << "\033[36m" <<  "Whisper Chat!" << "\033[0m" <<'\n';
     cout << '\n' << "Type 'EXIT' at anytime to leave the chat" << '\n';
     setupConnection(portNumber, ipAddress, user1);                // Setup the connection function
   } else if (userChoice == "2") {
