@@ -16,73 +16,63 @@ using std::cin;
 using std::string;
 using std::vector;
 
-//ASCII artwork
-
-string wordArt = R"(
-.------------------------------------------------------------------------------.
-|    __          ___     _                           _____ _           _       |
-|    \ \        / / |   (_)                         / ____| |         | |      |
-|     \ \  /\  / /| |__  _ ___ _ __   ___ _ __     | |    | |__   __ _| |_     |
-|      \ \/  \/ / | '_ \| / __| '_ \ / _ \ '__|    | |    | '_ \ / _` | __|    |
-|       \  /\  /  | | | | \__ \ |_) |  __/ |       | |____| | | | (_| | |_     |
-|        \/  \/   |_| |_|_|___/ .__/ \___|_|        \_____|_| |_|\__,_|\__|    |
-|                             | |                                              |
-|                             |_|                                              |
-'------------------------------------------------------------------------------'
-)";
-
 // generate a random number avoiding ports already in use
 
 int generateNumber(){
-  int randomNumber;
+  static std::random_device rd;                                                  // Initialize random_device to get a random seed
+  static std::mt19937 gen(rd());                                                 // Initialize the Mersenne Twister pseudo-random number generator with the seed
+  static std::uniform_int_distribution<> dist(1024, 65535);                      // Define a uniform distribution in the range only within port range you should use
+
   vector<int> portNumbersInUse {5000, 5432, 7000, 44950, 44960, 54818};  // vector containing ports in use
-  std::random_device rd;                                                  // Initialize random_device to get a random seed
-  std::mt19937 gen(rd());                                                 // Initialize the Mersenne Twister pseudo-random number generator with the seed
-  std::uniform_int_distribution<> dist(1024, 65535);                      // Define a uniform distribution in the range only within port range you should use
-  randomNumber = dist(gen);                                               // generate the number
-  if (std::find(portNumbersInUse.begin(), portNumbersInUse.end(), randomNumber)== portNumbersInUse.end()){
-    return randomNumber;
-  }
-  return generateNumber();
+
+  int randomNumber;
+
+  do {                                                                              // a do while loop to ensure it will keep generating a number until it finds one that is not already in use
+    randomNumber = dist(gen);
+  } while (std::find(portNumbersInUse.begin(), portNumbersInUse.end(), randomNumber) != portNumbersInUse.end());
+  return randomNumber;                                                              // return the valid number for use as a port number
 }
 
 // generate or specifiy a port number for the connection and validates selected port
 
 int portPreference(){
-  int randomNumber;
-  int portNumber;
-  string portSelection;
-  string portChoice;
   vector<int> portNumbersInUse {5000, 5432, 7000, 44950, 44960, 54818};
+  string portSelection, portChoice;
+  int portNumber;
 
   cout << "First we will create a port in order to setup the chat. " << '\n';
   cout << '\n' << "Do you want to select one or have one generated automatically? " << '\n';
-  cout << "Please select one of the following numbers: " << '\n';
-  cout << "1: specify a port " << '\n';
-  cout << "2: generate one automatically " << '\n';
-  std::getline(cin, portChoice);  // Read user choice as a string
-  if (portChoice == "1"){
-    cout << '\n' << "Type a port number: ";
-    std::getline(cin, portSelection);             // Read user choice as a string
-    portNumber = std::stoi(portSelection);
-    if (portNumber >= 1024 && portNumber <= 65535){
-      if (std::find(portNumbersInUse.begin(), portNumbersInUse.end(), portNumber) == portNumbersInUse.end()) {
-        return portNumber;
-      } else {
-        cout << "Port number is already in use. Try again or generate a port automatically."<< "\n";
-        return portPreference();
+
+  while(true) {
+    cout << "Please select one of the following numbers: " << '\n';
+    cout << "1: specify a port " << '\n';
+    cout << "2: generate one automatically " << '\n';
+    std::getline(cin, portChoice);                                // Read user choice as a string
+    if (portChoice == "1"){
+      cout << '\n' << "Type a port number: ";
+      std::getline(cin, portSelection);                           // Read user choice as a string
+      try {
+        portNumber = std::stoi(portSelection);                   // convert string to an integer
+        if (portNumber < 1024 || portNumber > 65535){           // checking if port specified is within correct range
+          cout << "Please type a number within the correct range (1024 - 65535)" << '\n';
+          continue;
+        }
+        if (std::find(portNumbersInUse.begin(), portNumbersInUse.end(), portNumber) != portNumbersInUse.end()) {    // if the find algorithm does not return (vector.end()) the number was found
+          cout << "Port number is already in use. Try again or generate a port automatically."<< "\n";
+          continue;                                                                                                 // loops around again
+        }
+        return portNumber;                                                                                          //valid unused port number
+      } catch (std::invalid_argument const& ex) {
+        cout << "You have entered something incorrectly. Please only type numbers";
       }
+    } else if (portChoice == "2") {
+      portNumber = generateNumber();
+      cout << "port number is " << portNumber << '\n';
+      return portNumber;
     } else {
-      cout << "Please type a number within the correct range (1024 - 65535)" << '\n';
-      return portPreference();
+      cout << "Please only enter 1 or 2";
     }
-  } else {
-  //generate random port number
-  portNumber = generateNumber();
-  cout << "port number is " << portNumber << '\n';
-  return portNumber;
   }
-  return portNumber;
 }
 
 bool chatOpen = true;
@@ -233,6 +223,21 @@ int joinConnection(int portNumber, string ipAddress, string user2)
   }
   return 0;  // Return 0 for success
 }
+
+//ASCII artwork
+
+string wordArt = R"(
+  .------------------------------------------------------------------------------.
+  |    __          ___     _                           _____ _           _       |
+  |    \ \        / / |   (_)                         / ____| |         | |      |
+  |     \ \  /\  / /| |__  _ ___ _ __   ___ _ __     | |    | |__   __ _| |_     |
+  |      \ \/  \/ / | '_ \| / __| '_ \ / _ \ '__|    | |    | '_ \ / _` | __|    |
+  |       \  /\  /  | | | | \__ \ |_) |  __/ |       | |____| | | | (_| | |_     |
+  |        \/  \/   |_| |_|_|___/ .__/ \___|_|        \_____|_| |_|\__,_|\__|    |
+  |                             | |                                              |
+  |                             |_|                                              |
+  '------------------------------------------------------------------------------'
+  )";
 
 int runProgramme(){
   string user1, user2, userChoice;
