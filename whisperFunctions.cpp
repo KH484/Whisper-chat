@@ -85,21 +85,21 @@ void SendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
       std::getline(cin, message);
       if (message == "EXIT") {
         message += "\n";                                                                      // Send the shutdown message to the client
-        boost::asio::write(ssl_socket, boost::asio::buffer(message));             // Send shutdown signal to the client
+        boost::asio::write(ssl_socket, boost::asio::buffer(message));                         // Send shutdown signal to the client
         chatOpen = false;
         cout << "The chat has ended as 'EXIT' was typed." << '\n';
         cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "\033[0m" << "."  << "Goodbye" << '\n';                      // Exit condition for the loop
         break;  // Exit the loop
       }else {
-        string messageFormat = name + ": " + message + '\n';                              // adding the newline character so getline knows it's the end of the message
+        string messageFormat = name + ": " + message + '\n';                                // adding the newline character so getline knows it's the end of the message
         boost::asio::write(ssl_socket, boost::asio::buffer(messageFormat));                // Send the message to the client
       }
     } catch (std::exception& error){
       std::cerr << "Send Exception: " << error.what() << '\n';
       break;
     }
+  break;
   }
-  exit(0);  // Forces the program to exit
 }
 
 void ReadMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
@@ -130,8 +130,8 @@ void ReadMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
       chatOpen = false;
       break;
     }
+    break;
   }
-  exit(0);  // Forces the program to exit
 }
 
 const string certFile = "SSLfiles/whisper.crt";                     // SSL server certificate
