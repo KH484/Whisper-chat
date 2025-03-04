@@ -12,10 +12,10 @@
 using std::string;
 
 // int portPreference();
-int generateNumber();
-int portPreference();
-int setupConnection(int portNumber, string ipAddress, string user1);
+int GenerateNumber();
+int PortPreference();
+int SetupConnection(int portNumber, string ipAddress, string user1);
 int joinConnection(int portNumber, string ipAddress, string user2);
-void sendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name);
-void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name);
-int runProgramme();
+void SendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name);
+void ReadMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name);
+int RunProgramme();
