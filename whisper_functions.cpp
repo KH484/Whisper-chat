@@ -18,66 +18,66 @@ using std::vector;
 
 // generate a random number avoiding ports already in use
 
-int GenerateNumber(){
-  static std::random_device rd;                                                  // Initialize random_device to get a random seed
-  static std::mt19937 gen(rd());                                                 // Initialize the Mersenne Twister pseudo-random number generator with the seed
-  static std::uniform_int_distribution<> dist(1024, 65535);                      // Define a uniform distribution in the range only within port range you should use
+int generateNumber(){
+  static std::random_device rd;                                                                                   // Initialize random_device to get a random seed
+  static std::mt19937 gen(rd());                                                                                  // Initialize the Mersenne Twister pseudo-random number generator with the seed
+  static std::uniform_int_distribution<> dist(1024, 65535);                                                       // Define a uniform distribution in the range only within port range you should use
 
-  vector<int> portNumbersInUse {5000, 5432, 7000, 44950, 44960, 54818};  // vector containing ports in use
+  vector<int> portNumbersInUse {5000, 5432, 7000, 44950, 44960, 54818};                                           // vector containing ports in use
 
   int randomNumber;
 
-  do {                                                                              // a do while loop to ensure it will keep generating a number until it finds one that is not already in use
+  do {                                                                                                            // a do while loop to ensure it will keep generating a number until it finds one that is not already in use
     randomNumber = dist(gen);
-  } while (std::find(portNumbersInUse.begin(), portNumbersInUse.end(), randomNumber) != portNumbersInUse.end());
-  return randomNumber;                                                              // return the valid number for use as a port number
+  } while (std::find(portNumbersInUse.begin(), portNumbersInUse.end(), randomNumber) != portNumbersInUse.end());  // Using the find algorithm to check if the port is already in use
+  return randomNumber;                                                                                            // return the valid number for use as the port number
 }
 
 // generate or specifiy a port number for the connection and validates selected port
 
-int PortPreference(){
-  vector<int> portNumbersInUse {5000, 5432, 7000, 44950, 44960, 54818};
-  string portSelection, portChoice;
+int portPreference(){
+  vector<int> portNumbersInUse {5000, 5432, 7000, 44950, 44960, 54818};                                            // setting up a vector that contains the ports in use
+  string portChoice, userChoice;                                                                                   // variables to be used
   int portNumber;
 
   cout << "First we will create a port in order to setup the chat. " << '\n';
   cout << '\n' << "Do you want to select one or have one generated automatically? " << '\n';
 
-  while(true) {
+  while(true) {                                                                                                     // loop to ensure that errors in input will be handled efficiently
     cout << "Please select one of the following numbers: " << '\n';
     cout << "1: specify a port " << '\n';
     cout << "2: generate one automatically " << '\n';
-    std::getline(cin, portChoice);                                // Read user choice as a string
-    if (portChoice == "1"){
+    std::getline(cin, userChoice);                                                                                  // Read the whole line of input and put it in the variable userChoice.
+    if (userChoice == "1"){                                                                                         // if input was "1" run this section
       cout << '\n' << "Type a port number: ";
-      std::getline(cin, portSelection);                           // Read user choice as a string
-      try {
-        portNumber = std::stoi(portSelection);                   // convert string to an integer
-        if (portNumber < 1024 || portNumber > 65535){           // checking if port specified is within correct range
-          cout << "Please type a number within the correct range (1024 - 65535)" << '\n';
+      std::getline(cin, portChoice);                                                                                // Read the whole line of input and put it in the variable portSelection
+      try {                                                                                                         // using try and catch to catch any exceptions thrown from the conversion from string to integer
+        portNumber = std::stoi(portChoice);                                                                         // convert string to integer
+        if (portNumber < 1024 || portNumber > 65535){                                                               // checking if port specified is within correct range
+          cout << "Please type a number within the correct range (1024 - 65535)" << '\n';                           // error message to the user and it will loop back to the start of the function
           continue;
         }
         if (std::find(portNumbersInUse.begin(), portNumbersInUse.end(), portNumber) != portNumbersInUse.end()) {    // if the find algorithm does not return (vector.end()) the number was found
-          cout << "Port number is already in use. Try again or generate a port automatically."<< "\n";
-          continue;                                                                                                 // loops around again
+          cout << "Port number is already in use. Try again or generate a port automatically."<< "\n";              // print error message to the user
+          continue;                                                                                                 // loops back to the start
         }
-        return portNumber;                                                                                          //valid unused port number
-      } catch (std::invalid_argument const& ex) {
+        return portNumber;                                                                                          // return the valid port number
+      } catch (std::invalid_argument const& ex) {                                                                   // catching any exceptions thrown from the conversion from string to integer
         cout << "You have entered something incorrectly. Please only type numbers";
       }
-    } else if (portChoice == "2") {
-      portNumber = GenerateNumber();
-      cout << "port number is " << portNumber << '\n';
+    } else if (userChoice == "2") {                                                                                 // if user selects option 2
+      portNumber = generateNumber();                                                                                // run generate number function and use this to define the variable portnumber
+      cout << "port number is " << portNumber << '\n';                                                              // print the portnumber that was returned from the function
       return portNumber;
     } else {
-      cout << "Please only enter 1 or 2";
+      cout << "Please only enter 1 or 2";                                                                           // making sure the user only selects 1 or 2 from the menu and loop back if not
     }
   }
 }
 
 bool chatOpen = true;
 
-void SendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
+void sendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
   string message;
   while (chatOpen) {
     try {
@@ -91,38 +91,34 @@ void SendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
         cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "\033[0m" << "."  << "Goodbye" << '\n';                      // Exit condition for the loop
         break;  // Exit the loop
       }else {
-        string messageFormat = name + ": " + message + '\n';                                // adding the newline character so getline knows it's the end of the message
+        string messageFormat = name + ": " + message + '\n';                               // adding the newline character so getline knows it's the end of the message
         boost::asio::write(ssl_socket, boost::asio::buffer(messageFormat));                // Send the message to the client
       }
     } catch (std::exception& error){
       std::cerr << "Send Exception: " << error.what() << '\n';
       break;
     }
-  break;
+  break;                                                                                    // double check that the programme exits the loop
   }
 }
 
-void ReadMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
+void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
   string message;
-  boost::asio::streambuf buffer; // Buffer to hold the incoming data
+  boost::asio::streambuf buffer;                                                   // Buffer to hold the incoming data
   while (chatOpen){
-    boost::asio::read_until(ssl_socket, buffer, "\n");        // Read data until newline (Enter key) is pressed
+    boost::asio::read_until(ssl_socket, buffer, "\n");                            // Read data until newline (Enter key) is pressed
     if (buffer.size() > 0) {
-    std::istream input_stream(&buffer);                   // Extract the received message from the buffer
+    std::istream input_stream(&buffer);                                           // Extract the received message from the buffer
     std::getline(input_stream, message);
-      // Check if the received message is the shutdown signal "Shutdown"
-      if (message == "EXIT") {
-        chatOpen = false;  // Close the chat connection
-        cout << "EXIT was typed. Exiting the programme..." << '\n';  // Inform the client that the server ended the chat
-        cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "." << "\033[0m" << "Goodbye" << '\n';
-        break;  // Exit the loop and stop receiving messages
-      }
-      // Clear the prompt line (clear the line and move cursur back to beginning of the line)
-      cout << "\n" << "\033[1K\033[F";
-      // If message is not the shutdown signal, display it as part of the chat
-      cout << "\033[35m" + message + "\033[0m" << '\n';  // Print received message
-      // Print the prompt again, so the user knows where to type the next message
-      cout << name << ": " << std::flush;  // Prompt for the next message
+    if (message == "EXIT") {                                                    // Check if the received message is the shutdown signal "Shutdown"
+      chatOpen = false;                                                         // Close the chat connection
+      cout << "EXIT was typed. Exiting the programme..." << '\n';               // Inform the client that the server ended the chat
+      cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "." << "\033[0m" << "Goodbye" << '\n';
+      break;                                                                    // Exit the loop and stop receiving messages
+    }
+    cout << "\n" << "\033[1K\033[F";                                           // Clear the prompt line (clear the line and move cursur back to beginning of the line)
+    cout << "\033[35m" + message + "\033[0m" << '\n';                         // Print received message in a different colour
+    cout << name << ": " << std::flush;                                       // Prompt for the next message
     } else {
       cout << "Houston we have a problem. Message not received" << '\n';
       cout << "The chat has ended." << '\n';
@@ -139,7 +135,7 @@ const string privateKeyFile = "SSLfiles/whisper.key";               // SSL Priva
 const string publicKeyFile = "SSLfiles/whisper_public.key";         // SSL public key
 
 int SetupConnection(int portNumber, string ipAddress, string user1){
-  portNumber = PortPreference();
+  portNumber = portPreference();
   boost::asio::io_context io_context;                                                                 // Create an io_context object for Boost.Asio for asynchronous operations
   boost::system::error_code ec;                                                                       // catch any errors arising from the wrong ip address during conversion from string
   boost::asio::ip::tcp::acceptor acceptor(io_context);                                                // Define the TCP acceptor to listen on a specific endpoint
@@ -170,8 +166,8 @@ int SetupConnection(int portNumber, string ipAddress, string user1){
       cout << "\n" << "Client connected! You can now send messages." << '\n';  // Once connection is established, send a message
       cout << "\n" << "Type 'EXIT' at anytime to leave the chat" << '\n';
 
-      std::thread read_thread(ReadMessage, std::ref(ssl_socket), user1);         // Create a thread for reading messages from the server
-      std::thread send_thread(SendMessage, std::ref(ssl_socket), user1);           // Create a thread for sending messages to the server
+      std::thread read_thread(readMessage, std::ref(ssl_socket), user1);         // Create a thread for reading messages from the server
+      std::thread send_thread(sendMessage, std::ref(ssl_socket), user1);           // Create a thread for sending messages to the server
 
       read_thread.join();                                             // Join the threads (this makes sure that the main thread waits for the threads to finish)
       send_thread.join();
@@ -187,38 +183,40 @@ int SetupConnection(int portNumber, string ipAddress, string user1){
   return portNumber;
 }
 
-int JoinConnection(int portNumber, string ipAddress, string user2)
+int joinConnection(int portNumber, string ipAddress, string user2)
 {
-  boost::asio::io_context io_context;                                       // Create an io_context object for Boost.Asio for asynchronous operations
-  boost::asio::ssl::context SSLContext(boost::asio::ssl::context::tlsv12);  // Create SSL context
-  SSLContext.load_verify_file(certFile);                                    // Load server certificate
-  boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket(io_context, SSLContext);  // Create SSL socket
+  boost::asio::io_context io_context;                                                             // Create an io_context object for Boost.Asio for asynchronous operations
+  boost::asio::ssl::context SSLContext(boost::asio::ssl::context::tlsv12);                        // Create SSL context
+  SSLContext.load_verify_file(certFile);                                                          // Load server certificate
+
+  boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket(io_context, SSLContext);      // Create SSL socket
+  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);  // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
   cout << "Connecting on port " << portNumber;
-  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);   // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
   string name;
   cout << "\n" << "Connecting to Whisperer 1. Please wait to be connected..." << '\n';
   try {
-    ssl_socket.lowest_layer().connect(endpoint);  // Connect the SSL socket to the server
-    ssl_socket.handshake(boost::asio::ssl::stream_base::client);  // Perform SSL handshake
-    cout << '\n' << "SSL Handshake complete.  Your messages will be encrypted." << '\n';  // Handshake completed successfully
+    ssl_socket.lowest_layer().connect(endpoint);                                                  // Connect the SSL socket to the server
+    ssl_socket.handshake(boost::asio::ssl::stream_base::client);                                  // Perform SSL handshake
+    cout << '\n' << "SSL Handshake complete.  Your messages will be encrypted." << '\n';          // Handshake completed successfully
     cout << '\n' << "Connected to server! You can now send messages" << '\n';
     cout << "\n" << "Type 'EXIT' at anytime to leave the chat" << '\n';
-    std::thread read_thread(ReadMessage, std::ref(ssl_socket), user2);     // Start a thread for receiving messages
-    std::thread send_thread(SendMessage, std::ref(ssl_socket), user2);     // Start a thread for sending messages
+    std::thread read_thread(readMessage, std::ref(ssl_socket), user2);                            // std::ref ensures that both threads share the same SSL socket                          // Start a thread for receiving messages
+    std::thread send_thread(sendMessage, std::ref(ssl_socket), user2);                            // Start a thread for sending messages
 
-    read_thread.join();                                                     // Join the threads
+    read_thread.join();                                                                           // Join the threads
     send_thread.join();
   }
-  catch (const boost::system::system_error& error) {
+  catch (const boost::system::system_error& error) {                                              // Catch an exception in case a message was not received
       cout << "Error: " << error.what() << '\n';
       cout << "Houston we have a problem. Message not received" << '\n';
       cout << "The chat has ended." << '\n';
       cout << "Thank you for using Whisper Chat. Goodbye" << '\n';
-      return 1;                                             // Return 1 to indicate failure
+      return 1;                                                                                   // Return 1 to indicate failure
   }
-  return 0;  // Return 0 for success
+  return 0;                                                                                       // Return 0 for success
 }
+
 
 //ASCII artwork
 
@@ -235,7 +233,7 @@ string wordArt = R"(
   '------------------------------------------------------------------------------'
   )";
 
-int RunProgramme(){
+int runProgramme(){
   string user1, user2, userChoice;
   int portNumber;
   string port;
@@ -256,7 +254,7 @@ int RunProgramme(){
     std::getline(cin, user1);
     cout << "Hello " << user1 << ". Welcome to " << "\033[36m" <<  "Whisper Chat!" << "\033[0m" <<'\n';
     cout << '\n' << "Type 'EXIT' at anytime to leave the chat" << '\n';
-    SetupConnection(portNumber, ipAddress, user1);                // Setup the connection function
+    setupConnection(portNumber, ipAddress, user1);                // Setup the connection function
   } else if (userChoice == "2") {
       cout << '\n' << "Enter the port number selected by whisperer 1 (Server): " << '\n';
       std::getline(cin, port);
@@ -264,10 +262,10 @@ int RunProgramme(){
       cout << '\n' << "What is your name?: " << '\n';
       std::getline(cin, user2);
       cout << "Hello " << user2 << ". " << "Welcome to " << "\033[36m" <<  "Whisper Chat!" << "\033[0m" <<'\n';
-      JoinConnection(portNumber, ipAddress, user2);                  // Join the connection function
+      joinConnection(portNumber, ipAddress, user2);                  // Join the connection function
   } else {
       cout << "You typed something incorrectly.  Please only select 1 or 2" << '\n';
-      return RunProgramme();                                               // error handling run the programme again if wrong number inserted
+      return runProgramme();                                               // error handling run the programme again if wrong number inserted
   }
   return 0;
 }

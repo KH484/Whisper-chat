@@ -11,6 +11,6 @@
 
 int main()
 {
-  RunProgramme();
+  runProgramme();
   return 0;
 }
