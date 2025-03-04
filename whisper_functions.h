@@ -15,7 +15,7 @@ using std::string;
 int GenerateNumber();
 int PortPreference();
 int SetupConnection(int portNumber, string ipAddress, string user1);
-int joinConnection(int portNumber, string ipAddress, string user2);
+int JoinConnection(int portNumber, string ipAddress, string user2);
 void SendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name);
 void ReadMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name);
 int RunProgramme();
