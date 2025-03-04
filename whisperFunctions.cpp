@@ -16,6 +16,21 @@ using std::cin;
 using std::string;
 using std::vector;
 
+//ASCII artwork
+
+string wordArt = R"(
+.------------------------------------------------------------------------------.
+|    __          ___     _                           _____ _           _       |
+|    \ \        / / |   (_)                         / ____| |         | |      |
+|     \ \  /\  / /| |__  _ ___ _ __   ___ _ __     | |    | |__   __ _| |_     |
+|      \ \/  \/ / | '_ \| / __| '_ \ / _ \ '__|    | |    | '_ \ / _` | __|    |
+|       \  /\  /  | | | | \__ \ |_) |  __/ |       | |____| | | | (_| | |_     |
+|        \/  \/   |_| |_|_|___/ .__/ \___|_|        \_____|_| |_|\__,_|\__|    |
+|                             | |                                              |
+|                             |_|                                              |
+'------------------------------------------------------------------------------'
+)";
+
 // generate a random number avoiding ports already in use
 
 int generateNumber(){
@@ -31,7 +46,7 @@ int generateNumber(){
   return randomNumber;
 }
 
-// generate or specifiy a port number for the connection
+// generate or specifiy a port number for the connection and validates selected port
 
 int portPreference(){
   int randomNumber;
@@ -48,17 +63,17 @@ int portPreference(){
   std::getline(cin, portChoice);  // Read user choice as a string
   if (portChoice == "1"){
     cout << '\n' << "Type a port number: ";
-    std::getline(cin, portSelection);  // Read user choice as a string
+    std::getline(cin, portSelection);             // Read user choice as a string
     portNumber = std::stoi(portSelection);
     if (portNumber >= 1024 && portNumber <= 65535){
       if (count(portNumbersInUse.begin(), portNumbersInUse.end(), portNumber)) {
-        cout << "Port number is already in use. Pick again."<< "\n";
+        cout << "Port number is already in use. Try again or generate a port automatically."<< "\n";
         return portPreference();
       } else {
         return portNumber;
       }
     } else {
-      cout << "Please type a number within the correct range" << '\n';
+      cout << "Please type a number within the correct range (1024 - 65535)" << '\n';
       return portPreference();
     }
   } else {
@@ -144,14 +159,14 @@ int setupConnection(int portNumber, string ipAddress, string user1){
     try {
       acceptor.open(endpoint.protocol());                            // Open the acceptor with the protocol type (TCP)
       acceptor.bind(endpoint);                                       // Bind the acceptor to the endpoint (IP address and port)
-      acceptor.listen();
+      acceptor.listen();                                             // Start listening for incoming connections
       cout << "\n" << "Listening on port " << endpoint.port() << "...";
-      cout << "\n" << "Please wait to be connected." << '\n';    // Start listening for incoming connections
+      cout << "\n" << "Please wait to be connected." << '\n';
 
-      boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);                     // Create SSL context with TLSv12
-      ctx.use_certificate_file(certFile, boost::asio::ssl::context::pem);                   // Load the certificate and private key
-      ctx.use_private_key_file(privateKeyFile, boost::asio::ssl::context::pem);
-      boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket(io_context,ctx);    // adds the SSL functionality to a regular TCP socket
+      boost::asio::ssl::context SSLContext(boost::asio::ssl::context::tlsv12);                     // Create SSL context with TLSv12
+      SSLContext.use_certificate_file(certFile, boost::asio::ssl::context::pem);                   // Load the certificate and private key
+      SSLContext.use_private_key_file(privateKeyFile, boost::asio::ssl::context::pem);
+      boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket(io_context,SSLContext);    // adds the SSL functionality to a regular TCP socket
       acceptor.accept(ssl_socket.lowest_layer());                                           // Block until a connection is accepted then accept the TCP connection using the socket.
 
       try {
@@ -189,9 +204,9 @@ int setupConnection(int portNumber, string ipAddress, string user1){
 int joinConnection(int portNumber, string ipAddress, string user2)
 {
   boost::asio::io_context io_context;                                 // Create an io_context object for Boost.Asio for asynchronous operations
-  boost::asio::ssl::context ctx(boost::asio::ssl::context::tlsv12);  // Create SSL context
-  ctx.load_verify_file(certFile);                                    // Load server certificate
-  boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket(io_context, ctx);  // Create SSL socket
+  boost::asio::ssl::context SSLContext(boost::asio::ssl::context::tlsv12);  // Create SSL context
+  SSLContext.load_verify_file(certFile);                                    // Load server certificate
+  boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket(io_context, SSLContext);  // Create SSL socket
   cout << "Connecting on port " << portNumber;
   boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);   // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
@@ -225,7 +240,8 @@ int runProgramme(){
   string port;
   const string ipAddress = "192.168.1.219";
 
-  cout << "\n" << "\033[36m\033[5m" << "-* *-  -* *- -* *- -* *- -* *- W H I S P E R  C H A T -* *- -* *- -* *- -* *-  -* *-" << "\033[0m";
+  cout << "\n" << "\033[36m" << wordArt << "\033[0m";
+
   cout << "\n" << "\033[34m" << "* Made for parents to share parenting advice & tips while the little ones are asleep *" << "\033[0m" << '\n';
 
   cout << "\n" << "Would you like to:" << "\n";
