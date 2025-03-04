@@ -11,7 +11,7 @@ CPPFLAGS = -I$(OPENSSL_INCLUDE) -I$(BOOST_INCLUDE)    # Include paths for OpenSS
 LDFLAGS = -L$(OPENSSL_LIB) -L$(BOOST_LIB)            # Library paths for OpenSSL and Boost
 
 # List all source files (whisper.cpp and whisperFunctions.cpp)
-SRC = whisper.cpp whisperFunctions.cpp
+SRC = whisper.cpp whisper_functions.cpp
 
 OUT = whisper                                        # The name of the output executable
 
