@@ -10,7 +10,6 @@
 #include <vector>
 #include <random>
 #include <algorithm>
-#include <atomic>
 
 
 using std::cout;
@@ -193,18 +192,18 @@ int setupConnection(int portNumber, string ipAddress, string user1){
 
 int joinConnection(int portNumber, string ipAddress, string user2)
 {
-  boost::asio::io_context io_context;                                 // Create an io_context object for Boost.Asio for asynchronous operations
+  boost::asio::io_context io_context;                                       // Create an io_context object for Boost.Asio for asynchronous operations
   boost::asio::ssl::context SSLContext(boost::asio::ssl::context::tlsv12);  // Create SSL context
-  SSLContext.load_verify_file(certFile);                                    // Load server certificate
+  SSLContext.load_verify_file(certFile);
+  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);   // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number                                 // Load server certificate
   boost::asio::ssl::stream<boost::asio::ip::tcp::socket> ssl_socket(io_context, SSLContext);  // Create SSL socket
   cout << "Connecting on port " << portNumber;
-  boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::make_address(ipAddress), portNumber);   // uses the string ip address and makes it an ip address to use as the endpoint combined with the port number
 
   string name;
   cout << "\n" << "Connecting to Whisperer 1. Please wait to be connected..." << '\n';
   try {
-    ssl_socket.lowest_layer().connect(endpoint);  // Connect the SSL socket to the server
-    ssl_socket.handshake(boost::asio::ssl::stream_base::client);  // Perform SSL handshake
+    ssl_socket.lowest_layer().connect(endpoint);                            // Connect the SSL socket to the server
+    ssl_socket.handshake(boost::asio::ssl::stream_base::client);            // Perform SSL handshake
     cout << '\n' << "SSL Handshake complete.  Your messages will be encrypted." << '\n';  // Handshake completed successfully
     cout << '\n' << "Connected to server! You can now send messages" << '\n';
     cout << "\n" << "Type 'EXIT' at anytime to leave the chat" << '\n';
