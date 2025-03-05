@@ -99,7 +99,7 @@ void sendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
       break;
     }
   }
-  exit(0);  // Forces the program to exit
+  exit(0); // Forces the program to exit
 }
 
 void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
@@ -115,6 +115,7 @@ void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
         chatOpen = false;  // Close the chat connection
         cout << "EXIT was typed. Exiting the programme..." << '\n';  // Inform the client that the server ended the chat
         cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "." << "\033[0m" << "Goodbye" << '\n';
+        // This forces input to stop waiting
         break;  // Exit the loop and stop receiving messages
       }
       // Clear the prompt line (clear the line and move cursur back to beginning of the line)
@@ -131,7 +132,7 @@ void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
       break;
     }
   }
-  exit(0);  // Forces the program to exit
+  exit(0); // Forces the program to exit
 }
 
 const string certFile = "SSLfiles/whisper.crt";                     // SSL server certificate
@@ -224,6 +225,7 @@ int joinConnection(int portNumber, string ipAddress, string user2)
   return 0;  // Return 0 for success
 }
 
+
 //ASCII artwork
 
 string wordArt = R"(
@@ -238,7 +240,6 @@ string wordArt = R"(
   |                             |_|                                              |
   '------------------------------------------------------------------------------'
   )";
-
 
 int runProgramme(){
   string user1, user2, userChoice;

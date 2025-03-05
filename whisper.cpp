@@ -8,6 +8,7 @@
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
 
+using std::cout;
 
 int main()
 {
