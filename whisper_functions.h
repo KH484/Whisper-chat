@@ -8,6 +8,8 @@
 #include <vector>
 #include <random>
 #include <algorithm>
+#include <atomic>
+
 
 using std::string;
 

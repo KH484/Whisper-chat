@@ -7,6 +7,8 @@
 #include <openssl/ssl.h>                // open SSL header files necessary to handle the SSL functionality
 #include <openssl/crypto.h>
 #include <openssl/x509.h>
+#include <atomic>
+
 
 
 int main()
