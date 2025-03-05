@@ -10,6 +10,8 @@
 #include <vector>
 #include <random>
 #include <algorithm>
+#include <atomic>
+
 
 using std::cout;
 using std::cin;
@@ -23,7 +25,7 @@ int generateNumber(){
   static std::mt19937 gen(rd());                                                 // Initialize the Mersenne Twister pseudo-random number generator with the seed
   static std::uniform_int_distribution<> dist(1024, 65535);                      // Define a uniform distribution in the range only within port range you should use
 
-  vector<int> portNumbersInUse {5000, 5432, 7000, 44950, 44960, 54818};  // vector containing ports in use
+  vector<int> portNumbersInUse {5000, 5432, 7000, 44950, 44960, 54818};           // vector containing ports in use
 
   int randomNumber;
 
@@ -47,12 +49,12 @@ int portPreference(){
     cout << "Please select one of the following numbers: " << '\n';
     cout << "1: specify a port " << '\n';
     cout << "2: generate one automatically " << '\n';
-    std::getline(cin, portChoice);                                // Read user choice as a string
+    std::getline(cin, portChoice);                              // Read user choice as a string
     if (portChoice == "1"){
       cout << '\n' << "Type a port number: ";
-      std::getline(cin, portSelection);                           // Read user choice as a string
+      std::getline(cin, portSelection);                         // Read user choice as a string
       try {
-        portNumber = std::stoi(portSelection);                   // convert string to an integer
+        portNumber = std::stoi(portSelection);                  // convert string to an integer
         if (portNumber < 1024 || portNumber > 65535){           // checking if port specified is within correct range
           cout << "Please type a number within the correct range (1024 - 65535)" << '\n';
           continue;
@@ -99,7 +101,6 @@ void sendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
       break;
     }
   }
-  exit(0); // Forces the program to exit
 }
 
 void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
@@ -115,7 +116,6 @@ void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
         chatOpen = false;  // Close the chat connection
         cout << "EXIT was typed. Exiting the programme..." << '\n';  // Inform the client that the server ended the chat
         cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "." << "\033[0m" << "Goodbye" << '\n';
-        // This forces input to stop waiting
         break;  // Exit the loop and stop receiving messages
       }
       // Clear the prompt line (clear the line and move cursur back to beginning of the line)
@@ -132,7 +132,6 @@ void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_soc
       break;
     }
   }
-  exit(0); // Forces the program to exit
 }
 
 const string certFile = "SSLfiles/whisper.crt";                     // SSL server certificate
@@ -224,8 +223,6 @@ int joinConnection(int portNumber, string ipAddress, string user2)
   }
   return 0;  // Return 0 for success
 }
-
-
 //ASCII artwork
 
 string wordArt = R"(
@@ -240,6 +237,7 @@ string wordArt = R"(
   |                             |_|                                              |
   '------------------------------------------------------------------------------'
   )";
+
 
 int runProgramme(){
   string user1, user2, userChoice;
