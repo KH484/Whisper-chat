@@ -80,58 +80,94 @@ int portPreference(){
 bool chatOpen = true;
 
 void sendMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
-  string message;
-  while (chatOpen) {
-    try {
-      cout << name << ": " << std::flush;  // Prompt for the next message
-      std::getline(cin, message);
-      if (message == "EXIT") {
-        message += "\n";                                                                      // Send the shutdown message to the client
-        boost::asio::write(ssl_socket, boost::asio::buffer(message));             // Send shutdown signal to the client
-        chatOpen = false;
-        cout << "The chat has ended as 'EXIT' was typed." << '\n';
-        cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "\033[0m" << "."  << "Goodbye" << '\n';                      // Exit condition for the loop
-        break;  // Exit the loop
-      }else {
-        string messageFormat = name + ": " + message + '\n';                              // adding the newline character so getline knows it's the end of the message
-        boost::asio::write(ssl_socket, boost::asio::buffer(messageFormat));                // Send the message to the client
-      }
-    } catch (std::exception& error){
-      std::cerr << "Send Exception: " << error.what() << '\n';
-      break;
+    string message;
+    while (chatOpen) {
+        try {
+            cout << name << ": " << std::flush;  // Prompt for the next message
+            std::getline(cin, message);
+
+            if (message == "EXIT") {
+                message += "\n";  // Ensure newline for buffer handling
+                boost::asio::write(ssl_socket, boost::asio::buffer(message)); // Send shutdown signal
+                chatOpen = false;
+
+                cout << "The chat has ended as 'EXIT' was typed." << '\n';
+                cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "\033[0m" << ". Goodbye" << '\n';
+
+                // Ensure cleanup
+                ssl_socket.lowest_layer().close();
+                cin.clear();
+                std::exit(0);  // Force program to exit cleanly
+            } else {
+                string messageFormat = name + ": " + message + '\n';
+                boost::asio::write(ssl_socket, boost::asio::buffer(messageFormat));  // Send the message to the client
+            }
+        } catch (std::exception& error) {
+            std::cerr << "Send Exception: " << error.what() << '\n';
+            cout << "Houston we have a problem. Message not sent." << '\n';
+            cout << "The chat has ended." << '\n';
+            cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "\033[0m" << ". Goodbye" << '\n';
+            chatOpen = false;
+            break;
+        }
     }
-  }
+
+    // Cleanup if loop exits unexpectedly
+    ssl_socket.lowest_layer().close();
+    cin.clear();
+    std::exit(0);
 }
 
 void readMessage(boost::asio::ssl::stream<boost::asio::ip::tcp::socket>& ssl_socket, string name) {
-  string message;
-  boost::asio::streambuf buffer; // Buffer to hold the incoming data
-  while (chatOpen){
-    boost::asio::read_until(ssl_socket, buffer, "\n");        // Read data until newline (Enter key) is pressed
-    if (buffer.size() > 0) {
-    std::istream input_stream(&buffer);                   // Extract the received message from the buffer
-    std::getline(input_stream, message);
-      // Check if the received message is the shutdown signal "Shutdown"
-      if (message == "EXIT") {
-        chatOpen = false;  // Close the chat connection
-        cout << "EXIT was typed. Exiting the programme..." << '\n';  // Inform the client that the server ended the chat
-        cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "." << "\033[0m" << "Goodbye" << '\n';
-        break;  // Exit the loop and stop receiving messages
-      }
-      // Clear the prompt line (clear the line and move cursur back to beginning of the line)
-      cout << "\n" << "\033[1K\033[F";
-      // If message is not the shutdown signal, display it as part of the chat
-      cout << "\033[35m" + message + "\033[0m" << '\n';  // Print received message
-      // Print the prompt again, so the user knows where to type the next message
-      cout << name << ": " << std::flush;  // Prompt for the next message
-    } else {
-      cout << "Houston we have a problem. Message not received" << '\n';
-      cout << "The chat has ended." << '\n';
-      cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "." << "\033[0m" << "Goodbye" << '\n';
-      chatOpen = false;
-      break;
+    string message;
+    boost::asio::streambuf buffer;
+
+    while (chatOpen) {
+        try {
+            boost::asio::read_until(ssl_socket, buffer, "\n"); // Read data until newline (Enter key) is pressed
+            
+            if (buffer.size() > 0) {
+                std::istream input_stream(&buffer);
+                std::getline(input_stream, message);
+
+                if (message == "EXIT") {
+                    chatOpen = false;
+                    cout << "EXIT was typed. Exiting the programme...\n";
+                    cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "\033[0m" << ". Goodbye\n";
+
+                    // Ensure cleanup
+                    ssl_socket.lowest_layer().close();
+                    cin.clear();
+                    std::exit(0);
+                }
+
+                // Clear the prompt line and print received message
+                cout << "\n\033[1K\033[F";
+                cout << "\033[35m" + message + "\033[0m\n";  
+
+                // Print the prompt again for the next message
+                cout << name << ": " << std::flush;
+            } else {
+                cout << "Houston we have a problem. Message not received" << '\n';
+                cout << "The chat has ended." << '\n';
+                cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "\033[0m" << ". Goodbye" << '\n';
+                chatOpen = false;
+                break;
+            }
+        } catch (std::exception& error) {
+            std::cerr << "Read Exception: " << error.what() << '\n';
+            cout << "Houston we have a problem. Message not received" << '\n';
+            cout << "The chat has ended." << '\n';
+            cout << "Thank you for using " << "\033[36m" << "Whisper Chat" << "\033[0m" << ". Goodbye" << '\n';
+            chatOpen = false;
+            break;
+        }
     }
-  }
+
+    // Cleanup if loop exits unexpectedly
+    ssl_socket.lowest_layer().close();
+    cin.clear();
+    std::exit(0);
 }
 
 const string certFile = "SSLfiles/whisper.crt";                     // SSL server certificate
